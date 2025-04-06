@@ -1,0 +1,121 @@
+.court-diagram-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.court-diagram {
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  position: relative;
+  user-select: none; /* Prevent text selection */
+}
+
+.court-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none; /* Prevent drag events on the image */
+  -webkit-user-drag: none; /* Safari */
+  -moz-user-drag: none; /* Firefox */
+  -o-user-drag: none; /* Opera */
+}
+
+.shot-marker {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%); /* Center the marker on the exact position */
+  z-index: 10;
+  transition: transform 0.2s ease;
+}
+
+.shot-marker:hover {
+  transform: translate(-50%, -50%) scale(1.5);
+}
+
+.court-instructions {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+/* Debug visualization styles */
+.debug-point {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background-color: rgba(0, 0, 255, 0.7);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+
+.debug-area {
+  position: absolute;
+  background-color: rgba(255, 0, 0, 0.2);
+  border: 1px dashed rgba(255, 0, 0, 0.5);
+  z-index: 4;
+}
+
+.paint-area-top {
+  left: 37.2%;
+  top: 6.2%;
+  width: 25.6%;
+  height: 18.2%;
+}
+
+.paint-area-bottom {
+  left: 37.2%;
+  top: 75.6%;
+  width: 25.6%;
+  height: 18.2%;
+}
+
+.three-point-line-debug {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Shot outcome legend */
+.shot-outcome-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.legend-marker {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+  border: 1px solid #fff;
+}
+
+.legend-marker.made {
+  background-color: #28a745; /* Green */
+}
+
+.legend-marker.missed {
+  background-color: #dc3545; /* Red */
+}

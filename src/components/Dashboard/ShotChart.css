@@ -1,0 +1,65 @@
+.shot-chart-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.shot-chart {
+  width: 100%;
+  height: auto;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  position: relative;
+}
+
+.court-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.shot-marker {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  transition: transform 0.2s ease;
+}
+
+.shot-marker:hover {
+  transform: translate(-50%, -50%) scale(1.5);
+}
+
+.shot-chart-legend {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.legend-marker {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+  border: 1px solid #fff;
+}
+
+.legend-marker.made {
+  background-color: #28a745;
+}
+
+.legend-marker.missed {
+  background-color: #dc3545;
+}

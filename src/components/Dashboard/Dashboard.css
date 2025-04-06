@@ -1,0 +1,29 @@
+.dashboard {
+  margin-bottom: 20px;
+}
+
+.player-filter {
+  width: auto;
+  max-width: 200px;
+}
+
+.stat-card {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.event-log {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .player-filter {
+    width: 100%;
+    max-width: none;
+    margin-top: 10px;
+  }
+}

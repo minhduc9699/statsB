@@ -1,0 +1,50 @@
+.video-player-container {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.video-upload {
+  margin-bottom: 20px;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+}
+
+.video-element {
+  width: 100%;
+  max-height: 500px;
+  background-color: #000;
+}
+
+.video-controls {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.time-display {
+  margin: 0 15px;
+  font-family: monospace;
+  min-width: 100px;
+}
+
+.seek-bar {
+  flex-grow: 1;
+  margin: 0 10px;
+}
+
+@media (max-width: 768px) {
+  .video-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .time-display {
+    text-align: center;
+    margin: 10px 0;
+  }
+}

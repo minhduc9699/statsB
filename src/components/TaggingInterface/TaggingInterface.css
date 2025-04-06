@@ -1,0 +1,31 @@
+.tagging-interface {
+  margin-bottom: 20px;
+}
+
+.event-buttons {
+  margin-bottom: 15px;
+}
+
+.event-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  padding: 5px 10px;
+}
+
+.key {
+  display: inline-block;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  padding: 2px 6px;
+  margin-right: 5px;
+  font-family: monospace;
+  font-weight: bold;
+}
