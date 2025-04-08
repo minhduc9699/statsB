@@ -29,3 +29,52 @@
   font-family: monospace;
   font-weight: bold;
 }
+
+.event-button {
+  min-width: 90px;
+  padding: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyboard-badge {
+  margin-top: 5px;
+  font-size: 0.8rem;
+}
+
+.court-container {
+  position: relative;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.court-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+.court-instruction {
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .event-button {
+    min-width: 80px;
+    font-size: 0.9rem;
+  }
+}

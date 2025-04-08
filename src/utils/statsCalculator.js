@@ -44,15 +44,8 @@ export const filterEventsByType = (events, eventType) => {
 
 // Get player stats from events
 export const getPlayerStats = (events, playerId) => {
-  events.forEach(event => {
-    if (
-      event.eventType === 'shot' &&
-      event.details &&
-      event.details.assistingPlayerId === playerId
-    ) {
-      stats.assists++;
-    }
-  });
+  console.log({events})
+
   const playerEvents = filterEventsByPlayer(events, playerId);
   
   // Initialize stats
@@ -73,6 +66,15 @@ export const getPlayerStats = (events, playerId) => {
     turnovers: 0,
     totalEvents: playerEvents.length,
   };
+  events.forEach(event => {
+    if (
+      event.eventType === 'shot' &&
+      event.details &&
+      event.details.assist === playerId
+    ) {
+      stats.assists++;
+    }
+  });
   
   // Calculate stats from events
   playerEvents.forEach(event => {

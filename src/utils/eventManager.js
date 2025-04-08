@@ -7,7 +7,6 @@ export const EVENT_TYPES = {
   SHOT: { key: 'S', label: 'Shot' },
   FREE_THROW: { key: 'F', label: 'Free Throw' },
   REBOUND: { key: 'R', label: 'Rebound' },
-  ASSIST: { key: 'A', label: 'Assist' },
   STEAL: { key: 'T', label: 'Steal' },
   BLOCK: { key: 'B', label: 'Block' },
   TURNOVER: { key: 'O', label: 'Turnover' }

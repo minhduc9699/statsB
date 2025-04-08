@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Form, Row, Col, Card, ListGroup } from 'react-bootstrap';
+import { Button, Form, Row, Col, Card, ListGroup, Badge, Toast, ToastContainer } from 'react-bootstrap';
 import { EVENT_TYPES, getEventTypeFromKey, formatTime } from '../../utils/eventManager';
 import CourtDiagram from './CourtDiagram';
 import './TaggingInterface.css';
@@ -19,17 +19,9 @@ const TaggingInterface = ({
   const [reboundType, setReboundType] = useState('defensive');
   const [assistingPlayer, setAssistingPlayer] = useState('');
   const [shotLocation, setShotLocation] = useState(null);
-  const [keyboardShortcuts, setKeyboardShortcuts] = useState([]);
-
-  // Initialize keyboard shortcuts
-  useEffect(() => {
-    const shortcuts = Object.entries(EVENT_TYPES).map(([type, config]) => ({
-      type: type.toLowerCase(),
-      key: config.key,
-      label: config.label
-    }));
-    setKeyboardShortcuts(shortcuts);
-  }, []);
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [showToast, setShowToast] = useState(false);
+  const [lastEventAdded, setLastEventAdded] = useState(null);
 
   // Handle keyboard shortcuts
   const handleKeyPress = useCallback((e) => {
@@ -81,6 +73,29 @@ const TaggingInterface = ({
       };
     }
     
+    // Get player name for display
+    const playerName = players.find(p => p.id === selectedPlayer)?.name || selectedPlayer;
+    const assistName = players.find(p => p.id === assistingPlayer)?.name || '';
+    
+    // Create event summary for recent events list
+    const eventSummary = {
+      type: eventType,
+      player: playerName,
+      time: currentTime,
+      details: {
+        ...details,
+        assist: assistingPlayer,
+        assistingPlayerName: assistName
+      }
+    };
+    
+    // Add to recent events (keep last 5)
+    setRecentEvents(prev => [eventSummary, ...prev].slice(0, 5));
+    
+    // Set last event for toast
+    setLastEventAdded(eventSummary);
+    setShowToast(true);
+    
     // Call the onAddEvent function with the expected parameters
     onAddEvent(eventType, selectedPlayer, currentTime, details);
     
@@ -103,67 +118,166 @@ const TaggingInterface = ({
     setShotLocation(null);
   };
 
+  // Format event for display
+  const formatEventDisplay = (event) => {
+    let display = `${formatTime(event.time)} - ${event.player}: ${event.type}`;
+    
+    if (event.type === 'shot') {
+      display += ` (${event.details.shotType}, ${event.details.outcome})`;
+      if (event.details.assistingPlayerName) {
+        display += ` - Assist: ${event.details.assistingPlayerName}`;
+      }
+    } else if (event.type === 'rebound') {
+      display += ` (${event.details.reboundType})`;
+    }
+    
+    return display;
+  };
+
   return (
     <div className="tagging-interface">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="m-0">Current Time: {formatTime(currentTime)}</h5>
-        <Button 
-          variant={isPaused ? "success" : "danger"}
-          onClick={() => setIsPaused(!isPaused)}
+      {/* Toast notification for successful event tagging */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast 
+          onClose={() => setShowToast(false)} 
+          show={showToast} 
+          delay={3000} 
+          autohide
+          bg="success"
+          text="white"
         >
-          {isPaused ? "Resume" : "Pause"}
-        </Button>
-      </div>
+          <Toast.Header>
+            <strong className="me-auto">Event Tagged</strong>
+          </Toast.Header>
+          <Toast.Body>
+            {lastEventAdded && formatEventDisplay(lastEventAdded)}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
 
-      {isPaused && !showForm && (
-        <div className="text-center mb-3">
-          <p>Press a key to tag an event or click a button below:</p>
-          <div className="d-flex flex-wrap justify-content-center gap-2 mb-3">
-            {Object.entries(EVENT_TYPES).map(([type, config]) => (
-              <Button
-                key={type}
-                variant="outline-primary"
-                onClick={() => {
-                  setEventType(type.toLowerCase());
-                  setShowForm(true);
-                }}
-              >
-                {config.label} ({config.key})
-              </Button>
-            ))}
-          </div>
-          
-          <Card className="mb-3">
-            <Card.Header>Keyboard Shortcuts</Card.Header>
-            <ListGroup variant="flush">
-              {keyboardShortcuts.map((shortcut) => (
-                <ListGroup.Item key={shortcut.type}>
-                  <strong>{shortcut.key}</strong> - {shortcut.label}
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          </Card>
-        </div>
-      )}
+      <Row className="mb-3 align-items-center">
+        <Col xs={6}>
+          <h5 className="m-0">
+            <Badge bg="primary" className="me-2">
+              {formatTime(currentTime)}
+            </Badge>
+            {isPaused ? 'Video Paused' : 'Video Playing'}
+          </h5>
+        </Col>
+        <Col xs={6} className="text-end">
+          <Button 
+            variant={isPaused ? "success" : "danger"}
+            onClick={() => setIsPaused(!isPaused)}
+            size="sm"
+          >
+            <i className={`bi ${isPaused ? "bi-play-fill" : "bi-pause-fill"}`}></i>
+            {isPaused ? " Resume" : " Pause"}
+          </Button>
+        </Col>
+      </Row>
+
+      {isPaused && !showForm ? (
+        <Row>
+          <Col md={8}>
+            <Card className="mb-3">
+              <Card.Header className="bg-primary text-white">
+                <h5 className="m-0">Tag an Event</h5>
+              </Card.Header>
+              <Card.Body>
+                <div className="d-flex flex-wrap gap-2 mb-3">
+                  {Object.entries(EVENT_TYPES).map(([type, config]) => (
+                    <Button
+                      key={type}
+                      variant="outline-primary"
+                      className="event-button"
+                      onClick={() => {
+                        setEventType(type.toLowerCase());
+                        setShowForm(true);
+                      }}
+                    >
+                      <div className="d-flex flex-column align-items-center">
+                        <span>{config.label}</span>
+                        <Badge bg="secondary" className="keyboard-badge">
+                          {config.key}
+                        </Badge>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+                <div className="text-center text-muted small">
+                  <i className="bi bi-info-circle me-1"></i>
+                  Press keyboard shortcut or click button to tag an event
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={4}>
+            <Card className="mb-3">
+              <Card.Header className="bg-secondary text-white">
+                <h5 className="m-0">Recent Events</h5>
+              </Card.Header>
+              <ListGroup variant="flush">
+                {recentEvents.length > 0 ? (
+                  recentEvents.map((event, index) => (
+                    <ListGroup.Item key={index} className="py-2 px-3">
+                      <div className="d-flex align-items-center">
+                        <Badge 
+                          bg={event.type === 'shot' ? 
+                            (event.details.outcome === 'made' ? 'success' : 'danger') : 
+                            'primary'} 
+                          className="me-2"
+                        >
+                          {formatTime(event.time)}
+                        </Badge>
+                        <div className="small">
+                          <strong>{event.player}</strong>: {event.type}
+                          {event.type === 'shot' && ` (${event.details.shotType}, ${event.details.outcome})`}
+                          {event.details.assistingPlayerName && (
+                            <span className="text-muted"> • Assist: {event.details.assistingPlayerName}</span>
+                          )}
+                        </div>
+                      </div>
+                    </ListGroup.Item>
+                  ))
+                ) : (
+                  <ListGroup.Item className="text-center text-muted py-3">
+                    No events tagged yet
+                  </ListGroup.Item>
+                )}
+              </ListGroup>
+            </Card>
+          </Col>
+        </Row>
+      ) : null}
 
       {isPaused && showForm && (
         <Form onSubmit={handleSubmit}>
-          <Card className="mb-3">
-            <Card.Header>
+          <Card>
+            <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
               <h5 className="m-0">
-                {EVENT_TYPES[eventType.toUpperCase()]?.label || 'New Event'}
+                {EVENT_TYPES[eventType.toUpperCase()]?.label || eventType} at {formatTime(currentTime)}
               </h5>
+              <Button 
+                variant="light" 
+                size="sm" 
+                onClick={handleCancel}
+              >
+                <i className="bi bi-x-lg"></i>
+              </Button>
             </Card.Header>
             <Card.Body>
               <Row className="mb-3">
                 <Col>
                   <Form.Group>
-                    <Form.Label>Player</Form.Label>
+                    <Form.Label>
+                      <strong>Player</strong>
+                    </Form.Label>
                     <Form.Control 
                       as="select"
                       value={selectedPlayer}
                       onChange={(e) => setSelectedPlayer(e.target.value)}
                       required
+                      className="form-select-lg"
                     >
                       <option value="">Select Player</option>
                       {players.map((player) => (
@@ -179,39 +293,70 @@ const TaggingInterface = ({
               {eventType === 'shot' && (
                 <>
                   <Row className="mb-3">
-                    <Col>
+                    <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Shot Type</Form.Label>
-                        <Form.Control 
-                          as="select"
-                          value={shotType}
-                          onChange={(e) => setShotType(e.target.value)}
-                        >
-                          <option value="2-point">2-Point</option>
-                          <option value="3-point">3-Point</option>
-                        </Form.Control>
+                        <Form.Label>
+                          <strong>Shot Type</strong>
+                        </Form.Label>
+                        <div className="d-flex">
+                          <Button
+                            variant={shotType === '2-point' ? 'primary' : 'outline-primary'}
+                            className="w-100 me-2"
+                            onClick={() => setShotType('2-point')}
+                            type="button"
+                          >
+                            2-Point
+                          </Button>
+                          <Button
+                            variant={shotType === '3-point' ? 'primary' : 'outline-primary'}
+                            className="w-100"
+                            onClick={() => setShotType('3-point')}
+                            type="button"
+                          >
+                            3-Point
+                          </Button>
+                        </div>
                       </Form.Group>
                     </Col>
-                    <Col>
+                    <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Outcome</Form.Label>
-                        <Form.Control 
-                          as="select"
-                          value={shotOutcome}
-                          onChange={(e) => {
-                            setShotOutcome(e.target.value);
-                            // Update the shot location with the new outcome if it exists
-                            if (shotLocation) {
-                              setShotLocation({
-                                ...shotLocation,
-                                outcome: e.target.value
-                              });
-                            }
-                          }}
-                        >
-                          <option value="made">Made</option>
-                          <option value="missed">Missed</option>
-                        </Form.Control>
+                        <Form.Label>
+                          <strong>Outcome</strong>
+                        </Form.Label>
+                        <div className="d-flex">
+                          <Button
+                            variant={shotOutcome === 'made' ? 'success' : 'outline-success'}
+                            className="w-100 me-2"
+                            onClick={() => {
+                              setShotOutcome('made');
+                              if (shotLocation) {
+                                setShotLocation({
+                                  ...shotLocation,
+                                  outcome: 'made'
+                                });
+                              }
+                            }}
+                            type="button"
+                          >
+                            Made
+                          </Button>
+                          <Button
+                            variant={shotOutcome === 'missed' ? 'danger' : 'outline-danger'}
+                            className="w-100"
+                            onClick={() => {
+                              setShotOutcome('missed');
+                              if (shotLocation) {
+                                setShotLocation({
+                                  ...shotLocation,
+                                  outcome: 'missed'
+                                });
+                              }
+                            }}
+                            type="button"
+                          >
+                            Missed
+                          </Button>
+                        </div>
                       </Form.Group>
                     </Col>
                   </Row>
@@ -220,11 +365,14 @@ const TaggingInterface = ({
                     <Row className="mb-3">
                       <Col>
                         <Form.Group>
-                          <Form.Label>Assisted By</Form.Label>
+                          <Form.Label>
+                            <strong>Assisted By</strong>
+                          </Form.Label>
                           <Form.Control 
                             as="select"
                             value={assistingPlayer}
                             onChange={(e) => setAssistingPlayer(e.target.value)}
+                            className="form-select"
                           >
                             <option value="">No Assist</option>
                             {players
@@ -244,13 +392,27 @@ const TaggingInterface = ({
                   <Row className="mb-3">
                     <Col>
                       <Form.Group>
-                        <Form.Label>Shot Location</Form.Label>
-                        <CourtDiagram 
-                          onLocationSelect={handleLocationSelect} 
-                          selectedLocation={shotLocation} 
-                          shotType={shotType}
-                          shotOutcome={shotOutcome}
-                        />
+                        <Form.Label>
+                          <strong>Shot Location</strong> <span className="text-muted small">(Click on the court)</span>
+                        </Form.Label>
+                        <div className="court-container">
+                          <CourtDiagram 
+                            onLocationSelect={handleLocationSelect} 
+                            selectedLocation={shotLocation} 
+                            shotType={shotType}
+                            shotOutcome={shotOutcome}
+                          />
+                          {!shotLocation && (
+                            <div className="court-overlay">
+                              <div className="court-instruction">
+                                <Badge bg="primary" className="p-2">
+                                  <i className="bi bi-cursor-fill me-1"></i>
+                                  Click to mark shot location
+                                </Badge>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </Form.Group>
                     </Col>
                   </Row>
@@ -261,25 +423,42 @@ const TaggingInterface = ({
                 <Row className="mb-3">
                   <Col>
                     <Form.Group>
-                      <Form.Label>Rebound Type</Form.Label>
-                      <Form.Control 
-                        as="select"
-                        value={reboundType}
-                        onChange={(e) => setReboundType(e.target.value)}
-                      >
-                        <option value="defensive">Defensive</option>
-                        <option value="offensive">Offensive</option>
-                      </Form.Control>
+                      <Form.Label>
+                        <strong>Rebound Type</strong>
+                      </Form.Label>
+                      <div className="d-flex">
+                        <Button
+                          variant={reboundType === 'defensive' ? 'primary' : 'outline-primary'}
+                          className="w-100 me-2"
+                          onClick={() => setReboundType('defensive')}
+                          type="button"
+                        >
+                          Defensive
+                        </Button>
+                        <Button
+                          variant={reboundType === 'offensive' ? 'primary' : 'outline-primary'}
+                          className="w-100"
+                          onClick={() => setReboundType('offensive')}
+                          type="button"
+                        >
+                          Offensive
+                        </Button>
+                      </div>
                     </Form.Group>
                   </Col>
                 </Row>
               )}
 
-              <div className="d-flex justify-content-end gap-2">
-                <Button variant="secondary" onClick={handleCancel}>
+              <div className="d-flex justify-content-end gap-2 mt-4">
+                <Button variant="secondary" onClick={handleCancel} type="button">
                   Cancel
                 </Button>
-                <Button variant="primary" type="submit">
+                <Button 
+                  variant="primary" 
+                  type="submit"
+                  disabled={!selectedPlayer || (eventType === 'shot' && !shotLocation)}
+                >
+                  <i className="bi bi-check-lg me-1"></i>
                   Save Event
                 </Button>
               </div>

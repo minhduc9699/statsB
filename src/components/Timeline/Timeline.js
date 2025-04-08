@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip, Badge } from 'react-bootstrap';
 import { formatTime } from '../../utils/eventManager';
 import './Timeline.css';
 
@@ -83,6 +83,26 @@ const Timeline = ({ events, videoDuration, onMarkerClick, currentTime }) => {
     return tracks;
   };
   
+  // Get event icon based on type
+  const getEventIcon = (eventType) => {
+    switch (eventType) {
+      case 'shot':
+        return 'bi-bullseye';
+      case 'free-throw':
+        return 'bi-record-circle';
+      case 'rebound':
+        return 'bi-arrow-down-circle';
+      case 'steal':
+        return 'bi-lightning';
+      case 'block':
+        return 'bi-shield';
+      case 'turnover':
+        return 'bi-x-circle';
+      default:
+        return 'bi-circle';
+    }
+  };
+  
   // Group events by type for color coding
   const getEventColor = (eventType) => {
     switch (eventType) {
@@ -92,8 +112,6 @@ const Timeline = ({ events, videoDuration, onMarkerClick, currentTime }) => {
         return '#17a2b8'; // teal
       case 'rebound':
         return '#ffc107'; // yellow
-      case 'assist':
-        return '#6f42c1'; // purple
       case 'steal':
         return '#fd7e14'; // orange
       case 'block':
@@ -105,34 +123,30 @@ const Timeline = ({ events, videoDuration, onMarkerClick, currentTime }) => {
     }
   };
 
-  // Get event details for tooltip
-  const getEventDetails = (event) => {
-    const playerName = event.playerName || `Player ${event.playerId}`;
-    let details = `${formatTime(event.time)} - ${playerName}: ${event.eventType}`;
+  // Get event shape class based on type and outcome
+  const getEventShapeClass = (event) => {
+    const baseClass = 'timeline-marker';
     
-    if (!event.details) {
-      return details;
+    // Add shape class based on event type
+    if (event.eventType === 'shot' || event.eventType === 'free-throw') {
+      const outcome = event.details?.outcome || 'missed';
+      return `${baseClass} ${outcome === 'made' ? 'marker-success' : 'marker-missed'}`;
     }
     
-    switch (event.eventType) {
-      case 'shot':
-        details += ` (${event.details.shotType}, ${event.details.outcome})`;
-        break;
-      case 'free-throw':
-        details += ` (${event.details.outcome})`;
-        break;
-      case 'rebound':
-        details += ` (${event.details.reboundType})`;
-        break;
-      case 'assist':
-        const assistedName = event.details.assistedPlayerName || `Player ${event.details.assistedPlayer}`;
-        details += ` to ${assistedName}`;
-        break;
-      default:
-        break;
+    if (event.eventType === 'rebound') {
+      const reboundType = event.details?.reboundType || 'defensive';
+      return `${baseClass} ${reboundType === 'offensive' ? 'marker-offensive' : 'marker-defensive'}`;
     }
     
-    return details;
+    if (event.eventType === 'turnover') {
+      return `${baseClass} marker-negative`;
+    }
+    
+    if (event.eventType === 'block' || event.eventType === 'steal') {
+      return `${baseClass} marker-defensive-play`;
+    }
+    
+    return baseClass;
   };
 
   // Calculate minimum video duration to prevent division by zero
@@ -150,19 +164,37 @@ const Timeline = ({ events, videoDuration, onMarkerClick, currentTime }) => {
                 key={event.id}
                 placement="top"
                 overlay={
-                  <Tooltip id={`tooltip-${event.id}`}>
-                    {getEventDetails(event)}
+                  <Tooltip id={`tooltip-${event.id}`} className="event-tooltip">
+                    <div>
+                      <Badge bg="secondary" className="me-1">{formatTime(event.time)}</Badge>
+                      <strong>{event.playerName || `Player ${event.playerId}`}</strong>
+                    </div>
+                    <div className="mt-1">
+                      <Badge 
+                        bg={event.eventType === 'shot' && event.details?.outcome === 'made' ? 'success' : 
+                           (event.eventType === 'shot' && event.details?.outcome === 'missed' ? 'danger' : 'primary')}
+                      >
+                        {event.eventType}
+                      </Badge>
+                      {event.details?.shotType && ` (${event.details.shotType})`}
+                      {event.details?.reboundType && ` (${event.details.reboundType})`}
+                    </div>
                   </Tooltip>
                 }
               >
                 <div
-                  className="timeline-marker"
+                  className={getEventShapeClass(event)}
                   style={{
                     left: `${(event.normalizedTime / effectiveVideoDuration) * 100}%`,
                     backgroundColor: getEventColor(event.eventType)
                   }}
                   onClick={() => onMarkerClick(event)}
-                />
+                >
+                  <i className={`bi ${getEventIcon(event.eventType)}`}></i>
+                  {event.eventType === 'shot' && event.details?.outcome === 'made' && 
+                    (event.details?.shotType === '3-point' ? <span className="marker-points">3</span> : <span className="marker-points">2</span>)}
+                  {event.eventType === 'free-throw' && event.details?.outcome === 'made' && <span className="marker-points">1</span>}
+                </div>
               </OverlayTrigger>
             ))}
           </div>
@@ -184,6 +216,49 @@ const Timeline = ({ events, videoDuration, onMarkerClick, currentTime }) => {
         <span>{formatTime(effectiveVideoDuration / 2)}</span>
         <span>{formatTime(effectiveVideoDuration * 3 / 4)}</span>
         <span>{formatTime(effectiveVideoDuration)}</span>
+      </div>
+      
+      {/* Event type legend */}
+      <div className="timeline-legend">
+        <div className="legend-title">Event Types:</div>
+        <div className="legend-items">
+          <div className="legend-item">
+            <div className="legend-marker" style={{ backgroundColor: getEventColor('shot') }}>
+              <i className={`bi ${getEventIcon('shot')}`}></i>
+            </div>
+            <span>Shot</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-marker" style={{ backgroundColor: getEventColor('free-throw') }}>
+              <i className={`bi ${getEventIcon('free-throw')}`}></i>
+            </div>
+            <span>Free Throw</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-marker" style={{ backgroundColor: getEventColor('rebound') }}>
+              <i className={`bi ${getEventIcon('rebound')}`}></i>
+            </div>
+            <span>Rebound</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-marker" style={{ backgroundColor: getEventColor('steal') }}>
+              <i className={`bi ${getEventIcon('steal')}`}></i>
+            </div>
+            <span>Steal</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-marker" style={{ backgroundColor: getEventColor('block') }}>
+              <i className={`bi ${getEventIcon('block')}`}></i>
+            </div>
+            <span>Block</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-marker" style={{ backgroundColor: getEventColor('turnover') }}>
+              <i className={`bi ${getEventIcon('turnover')}`}></i>
+            </div>
+            <span>Turnover</span>
+          </div>
+        </div>
       </div>
     </div>
   );

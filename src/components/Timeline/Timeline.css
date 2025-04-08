@@ -1,61 +1,198 @@
 .timeline-container {
   margin: 20px 0;
-  padding: 10px 0;
+  position: relative;
 }
 
 .timeline-tracks-container {
   position: relative;
-  margin-bottom: 5px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  height: 100px;
+  overflow: hidden;
 }
 
 .timeline-track {
   position: relative;
-  height: 16px;
-  background-color: #e9ecef;
-  border-radius: 8px;
-  margin-bottom: 4px;
-}
-
-.timeline-ruler-track {
-  position: relative;
-  height: 2px;
-  background-color: #adb5bd;
-  margin-top: 6px;
+  height: 20px;
   margin-bottom: 5px;
 }
 
 .timeline-marker {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  top: 2px;
-  transform: translateX(-50%); /* Center the marker on its position */
+  transform: translate(-50%, -50%);
+  top: 50%;
   cursor: pointer;
-  z-index: 10;
-  transition: transform 0.1s ease, width 0.1s ease, height 0.1s ease;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 2;
 }
 
 .timeline-marker:hover {
-  transform: translateX(-50%) scale(1.5);
-  z-index: 15;
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 3;
+}
+
+/* Marker shapes based on event type */
+.marker-success {
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+.marker-missed {
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.marker-offensive {
+  border-radius: 3px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.marker-offensive i {
+  transform: rotate(-45deg);
+}
+
+.marker-defensive {
+  border-radius: 3px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.marker-defensive i {
+  transform: rotate(-45deg);
+}
+
+.marker-negative {
+  border-radius: 0;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.marker-defensive-play {
+  border-radius: 3px;
+}
+
+/* Points indicator for shots */
+.marker-points {
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  background-color: #212529;
+  color: white;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.timeline-ruler-track {
+  position: relative;
+  height: 20px;
+  border-top: 1px dashed #dee2e6;
 }
 
 .timeline-current-time {
   position: absolute;
   width: 2px;
-  height: 16px;
-  background-color: #dc3545;
-  top: -7px;
-  transform: translateX(-50%); /* Center the line on its position */
-  z-index: 5;
+  height: 100px;
+  background-color: red;
+  top: -80px;
+  z-index: 4;
+}
+
+.timeline-current-time::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -4px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid red;
 }
 
 .timeline-labels {
   display: flex;
   justify-content: space-between;
+  margin-top: 5px;
   font-size: 12px;
   color: #6c757d;
-  padding: 0 6px; /* Add padding to align with the track */
+}
+
+/* Event tooltip styling */
+.event-tooltip {
+  max-width: 200px;
+}
+
+/* Legend styling */
+.timeline-legend {
+  margin-top: 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #f8f9fa;
+}
+
+.legend-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.legend-marker {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 9px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .timeline-tracks-container {
+    height: 80px;
+  }
+  
+  .timeline-marker {
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+  }
+  
+  .legend-items {
+    gap: 5px;
+  }
+  
+  .legend-item {
+    font-size: 10px;
+  }
 }
