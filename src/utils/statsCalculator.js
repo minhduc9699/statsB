@@ -44,6 +44,15 @@ export const filterEventsByType = (events, eventType) => {
 
 // Get player stats from events
 export const getPlayerStats = (events, playerId) => {
+  events.forEach(event => {
+    if (
+      event.eventType === 'shot' &&
+      event.details &&
+      event.details.assistingPlayerId === playerId
+    ) {
+      stats.assists++;
+    }
+  });
   const playerEvents = filterEventsByPlayer(events, playerId);
   
   // Initialize stats
@@ -67,30 +76,31 @@ export const getPlayerStats = (events, playerId) => {
   
   // Calculate stats from events
   playerEvents.forEach(event => {
+    const details = event.details;
     switch(event.eventType) {
       case 'shot':
         stats.fgAttempted++;
-        if (event.outcome === 'made') {
+        if (details.outcome === 'made') {
           stats.fgMade++;
-          stats.points += event.shotType === '3-point' ? 3 : 2;
+          stats.points += details.shotType === '3-point' ? 3 : 2;
         }
-        if (event.shotType === '3-point') {
+        if (details.shotType === '3-point') {
           stats.fg3Attempted++;
-          if (event.outcome === 'made') {
+          if (details.outcome === 'made') {
             stats.fg3Made++;
           }
         }
         break;
       case 'free-throw':
         stats.ftAttempted++;
-        if (event.outcome === 'made') {
+        if (details.outcome === 'made') {
           stats.ftMade++;
           stats.points += 1;
         }
         break;
       case 'rebound':
         stats.rebounds++;
-        if (event.reboundType === 'offensive') {
+        if (details.reboundType === 'offensive') {
           stats.offensiveRebounds++;
         } else {
           stats.defensiveRebounds++;
@@ -147,30 +157,34 @@ export const getTeamStats = (events) => {
   
   // Calculate stats from events
   events.forEach(event => {
+    const details = event.details;
     switch(event.eventType) {
       case 'shot':
         stats.fgAttempted++;
-        if (event.outcome === 'made') {
+        if (details.outcome === 'made') {
           stats.fgMade++;
-          stats.points += event.shotType === '3-point' ? 3 : 2;
+          stats.points += details.shotType === '3-point' ? 3 : 2;
         }
-        if (event.shotType === '3-point') {
+        if (details.shotType === '3-point') {
           stats.fg3Attempted++;
-          if (event.outcome === 'made') {
+          if (details.outcome === 'made') {
             stats.fg3Made++;
           }
+        }
+        if (details.assist) {
+          stats.assists++;
         }
         break;
       case 'free-throw':
         stats.ftAttempted++;
-        if (event.outcome === 'made') {
+        if (details.outcome === 'made') {
           stats.ftMade++;
           stats.points += 1;
         }
         break;
       case 'rebound':
         stats.rebounds++;
-        if (event.reboundType === 'offensive') {
+        if (details.reboundType === 'offensive') {
           stats.offensiveRebounds++;
         } else {
           stats.defensiveRebounds++;
