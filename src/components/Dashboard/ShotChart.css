@@ -1,6 +1,6 @@
 .shot-chart-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
   margin: 0 auto;
   position: relative;
 }
@@ -12,12 +12,35 @@
   border: 1px solid #dee2e6;
   border-radius: 4px;
   position: relative;
+  margin-bottom: 15px;
+}
+
+.chart-title {
+  text-align: center;
+  margin: 5px 0;
+  font-weight: 600;
+  color: #495057;
+}
+
+.court-wrapper {
+  position: relative;
+  width: 100%;
 }
 
 .court-image {
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* Adjust sizes for different court types */
+.full-court-chart {
+  max-width: 100%;
+}
+
+.half-court-chart {
+  max-width: 80%;
+  margin: 0 auto;
 }
 
 .shot-marker {
@@ -28,10 +51,12 @@
   transform: translate(-50%, -50%);
   z-index: 10;
   transition: transform 0.2s ease;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
 
 .shot-marker:hover {
   transform: translate(-50%, -50%) scale(1.5);
+  z-index: 20;
 }
 
 .shot-chart-legend {

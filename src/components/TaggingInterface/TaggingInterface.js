@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Form, Row, Col, Card, ListGroup, Badge, Toast, ToastContainer } from 'react-bootstrap';
 import { EVENT_TYPES, getEventTypeFromKey, formatTime } from '../../utils/eventManager';
 import CourtDiagram from './CourtDiagram';
+import GameTypeSelector from '../GameTypeSelector/GameTypeSelector';
 import './TaggingInterface.css';
 
 const TaggingInterface = ({ 
@@ -22,6 +23,7 @@ const TaggingInterface = ({
   const [recentEvents, setRecentEvents] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [lastEventAdded, setLastEventAdded] = useState(null);
+  const [gameType, setGameType] = useState('3v3'); // Default to 3v3 half court
 
   // Handle keyboard shortcuts
   const handleKeyPress = useCallback((e) => {
@@ -40,6 +42,13 @@ const TaggingInterface = ({
       document.removeEventListener('keypress', handleKeyPress);
     };
   }, [handleKeyPress]);
+
+  // Handle game type change
+  const handleGameTypeChange = (type) => {
+    setGameType(type);
+    // Reset shot location when game type changes as court dimensions change
+    setShotLocation(null);
+  };
 
   // Handle shot location selection
   const handleLocationSelect = (location) => {
@@ -61,7 +70,8 @@ const TaggingInterface = ({
       details = {
         shotType,
         outcome: shotOutcome,
-        location: shotLocation
+        location: shotLocation,
+        gameType // Include game type in event details
       };
       
       if (shotOutcome === 'made' && assistingPlayer) {
@@ -69,8 +79,13 @@ const TaggingInterface = ({
       }
     } else if (eventType === 'rebound') {
       details = {
-        reboundType
+        reboundType,
+        gameType // Include game type in event details
       };
+    } else {
+      details = {
+        gameType // Include game type in event details
+      }
     }
     
     // Get player name for display
@@ -175,6 +190,12 @@ const TaggingInterface = ({
           </Button>
         </Col>
       </Row>
+
+      {/* Game Type Selector */}
+      <GameTypeSelector 
+        selectedType={gameType} 
+        onTypeChange={handleGameTypeChange} 
+      />
 
       {isPaused && !showForm ? (
         <Row>
@@ -401,6 +422,7 @@ const TaggingInterface = ({
                             selectedLocation={shotLocation} 
                             shotType={shotType}
                             shotOutcome={shotOutcome}
+                            gameType={gameType}
                           />
                           {!shotLocation && (
                             <div className="court-overlay">

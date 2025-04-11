@@ -1,0 +1,13 @@
+.game-type-selector {
+  margin-bottom: 1rem;
+}
+
+.game-type-button {
+  min-width: 80px;
+  padding: 0.5rem 0.75rem;
+}
+
+.text-size-xs {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}

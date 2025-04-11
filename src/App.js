@@ -138,7 +138,7 @@ function App() {
         </header>
         
         <Row>
-          <Col lg={8}>
+          <Col lg={6}>
             <VideoPlayer 
               onTimeUpdate={handleTimeUpdate}
               onDurationChange={handleDurationChange}
@@ -147,7 +147,6 @@ function App() {
               setIsPaused={setIsPaused}
               currentTime={currentTime}
             />
-            
             <Timeline 
               events={events}
               videoDuration={videoDuration}
@@ -155,17 +154,16 @@ function App() {
               currentTime={currentTime}
               key={`timeline-${videoDuration}-${events.length}`}
             />
-            
-            <TaggingInterface 
+          </Col>
+          
+          <Col lg={6}>
+            <TaggingInterface
               currentTime={currentTime}
               onAddEvent={handleAddEvent}
               isPaused={isPaused}
               setIsPaused={setIsPaused}
               players={players}
             />
-          </Col>
-          
-          <Col lg={4}>
             <Dashboard 
               events={events}
               players={players}
