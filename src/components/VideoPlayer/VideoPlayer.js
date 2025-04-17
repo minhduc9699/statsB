@@ -1,26 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button, Form } from 'react-bootstrap';
+import { useSelector, useDispatch } from 'react-redux';
+import { setVideoFile, setCurrentTime, setDuration, setIsPaused } from '../../store/slices/videoSlice';
 import './VideoPlayer.css';
 import { formatTime } from '../../utils/eventManager';
 
-const VideoPlayer = ({ 
-  onTimeUpdate, 
-  onTagEvent, 
-  isPaused, 
-  setIsPaused, 
-  currentTime: externalCurrentTime,
-  onDurationChange 
-}) => {
-  const [videoFile, setVideoFile] = useState(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+const VideoPlayer = () => {
+  const dispatch = useDispatch();
+  const videoFile = useSelector(state => state.video.videoFile);
+  const currentTime = useSelector(state => state.video.currentTime);
+  const videoDuration = useSelector(state => state.video.duration);
+  const isPaused = useSelector(state => state.video.isPaused);
   const videoRef = useRef(null);
 
   // Handle file selection
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setVideoFile(URL.createObjectURL(file));
+      dispatch(setVideoFile(URL.createObjectURL(file)));
+      dispatch(setCurrentTime(0));
+      dispatch(setDuration(0));
     }
   };
 
@@ -28,8 +27,7 @@ const VideoPlayer = ({
   const handleTimeUpdate = () => {
     const video = videoRef.current;
     if (video) {
-      setCurrentTime(video.currentTime);
-      onTimeUpdate(video.currentTime);
+      dispatch(setCurrentTime(video.currentTime));
     }
   };
 
@@ -38,11 +36,7 @@ const VideoPlayer = ({
     const video = videoRef.current;
     if (video) {
       const newDuration = video.duration;
-      setDuration(newDuration);
-      // Notify parent component about duration change
-      if (onDurationChange) {
-        onDurationChange(newDuration);
-      }
+      dispatch(setDuration(newDuration));
     }
   };
 
@@ -52,10 +46,10 @@ const VideoPlayer = ({
     if (video) {
       if (video.paused) {
         video.play();
-        setIsPaused(false);
+        dispatch(setIsPaused(false));
       } else {
         video.pause();
-        setIsPaused(true);
+        dispatch(setIsPaused(true));
       }
     }
   };
@@ -66,12 +60,11 @@ const VideoPlayer = ({
     const seekTime = parseFloat(e.target.value);
     if (video) {
       video.currentTime = seekTime;
-      setCurrentTime(seekTime);
-      onTimeUpdate(seekTime);
+      dispatch(setCurrentTime(seekTime));
     }
   };
 
-  // Update video playback state based on isPaused prop
+  // Update video playback state based on isPaused state
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
@@ -83,14 +76,13 @@ const VideoPlayer = ({
     }
   }, [isPaused, videoFile]);
 
-  // Sync video time with external currentTime (from timeline markers)
+  // Sync video time with currentTime state (from timeline markers or Redux)
   useEffect(() => {
     const video = videoRef.current;
-    if (video && Math.abs(video.currentTime - externalCurrentTime) > 0.5) {
-      video.currentTime = externalCurrentTime;
-      setCurrentTime(externalCurrentTime);
+    if (video && Math.abs(video.currentTime - currentTime) > 0.5) {
+      video.currentTime = currentTime;
     }
-  }, [externalCurrentTime]);
+  }, [currentTime]);
 
   // Jump forward 5 seconds
   const jumpForward = () => {
@@ -141,12 +133,12 @@ const VideoPlayer = ({
             <Button variant="secondary" onClick={jumpForward}>+5s</Button>
             
             <div className="time-display">
-              {formatTime(currentTime)} / {formatTime(duration)}
+              {formatTime(currentTime)} / {formatTime(videoDuration)}
             </div>
             
             <Form.Range
               min={0}
-              max={duration}
+              max={videoDuration}
               step={0.1}
               value={currentTime}
               onChange={handleSeek}

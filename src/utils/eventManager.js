@@ -17,17 +17,41 @@ export const generateEventId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 };
 
-// Format time in MM:SS format
+/**
+ * Format time in hh:mm:ss for any duration.
+ * Always returns two digits for each unit, e.g., 01:05:09, 00:03:12
+ * @param {number} seconds - Number of seconds
+ * @returns {string} Time formatted as hh:mm:ss
+ * @example
+ *   formatTime(3661) // '01:01:01'
+ */
 export const formatTime = (seconds) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  return [hrs, mins, secs]
+    .map(unit => String(unit).padStart(2, '0'))
+    .join(':');
 };
 
-// Convert time string to seconds
+/**
+ * Convert time string (hh:mm:ss or mm:ss) to seconds
+ * @param {string} timeString - Time as 'hh:mm:ss' or 'mm:ss'
+ * @returns {number} Total seconds
+ * @example
+ *   timeToSeconds('01:02:03') // 3723
+ *   timeToSeconds('05:12')    // 312
+ */
 export const timeToSeconds = (timeString) => {
-  const [minutes, seconds] = timeString.split(':').map(Number);
-  return minutes * 60 + seconds;
+  const parts = timeString.split(':').map(Number);
+  if (parts.length === 3) {
+    // hh:mm:ss
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  } else if (parts.length === 2) {
+    // mm:ss
+    return parts[0] * 60 + parts[1];
+  }
+  return 0;
 };
 
 // Create a new event object
@@ -93,10 +117,10 @@ export const groupEventsByPlayer = (events) => {
 // Group events by type
 export const groupEventsByType = (events) => {
   return events.reduce((acc, event) => {
-    if (!acc[event.eventType]) {
-      acc[event.eventType] = [];
+    if (!acc[event.type]) {
+      acc[event.type] = [];
     }
-    acc[event.eventType].push(event);
+    acc[event.type].push(event);
     return acc;
   }, {});
 };

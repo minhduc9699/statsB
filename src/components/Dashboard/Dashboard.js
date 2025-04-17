@@ -1,21 +1,28 @@
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Card, Table, Tabs, Tab, Form, Row, Col, Button } from 'react-bootstrap';
 import { 
   getPlayerStats, 
   getTeamStats, 
   calculateUsageRate 
 } from '../../utils/statsCalculator';
+import { formatTime } from '../../utils/eventManager';
 import ShotChart from './ShotChart';
+import { deleteEvent } from '../../store/slices/eventsSlice';
+import { EVENT_TYPE_SHOT, EVENT_TYPE_FREE_THROW, EVENT_TYPE_REBOUND, EVENT_TYPE_ASSIST } from '../../constants/eventTypes';
 import './Dashboard.css';
 
-const Dashboard = ({ events, players, onDeleteEvent }) => {
+const Dashboard = () => {
+  const events = useSelector(state => state.events.list);
+  const players = useSelector(state => state.players.list);
   const [activeTab, setActiveTab] = useState('basic');
   const [selectedPlayer, setSelectedPlayer] = useState('all');
+  const dispatch = useDispatch();
   
   // Filter events by selected player
   const filteredEvents = selectedPlayer === 'all' 
-    ? events 
-    : events.filter(event => event.playerId === selectedPlayer);
+    ? [...events] 
+    : [...events.filter(event => event.playerId === selectedPlayer)];
   
   // Get stats based on selected player
   const stats = selectedPlayer === 'all' 
@@ -24,9 +31,8 @@ const Dashboard = ({ events, players, onDeleteEvent }) => {
   
   // Get shot events for shot chart
   const shotEvents = filteredEvents.filter(event => 
-    event.eventType === 'shot' && event.details.location
+    event.type === EVENT_TYPE_SHOT && event.details?.location
   );
-  
   // Calculate usage rates for all players
   const playerUsageRates = players.map(player => {
     const playerEvents = events.filter(event => event.playerId === player.id);
@@ -37,20 +43,22 @@ const Dashboard = ({ events, players, onDeleteEvent }) => {
   }).sort((a, b) => b.usageRate - a.usageRate);
 
   // Format event details based on event type
-  const formatEventDetails = (event, player) => {
+  const formatEventDetails = (event) => {
     let details = '';
-    switch(event.eventType) {
-      case 'shot':
-        details = `${event.details.shotType} (${event.details.outcome})`;
+    const eventType = event.type;
+    
+    switch(eventType) {
+      case EVENT_TYPE_SHOT:
+        details = `${event.details?.shotType || ''} (${event.details?.outcome || ''})`;
         break;
-      case 'free-throw':
-        details = event.details.outcome;
+      case EVENT_TYPE_FREE_THROW:
+        details = event.details?.outcome || '';
         break;
-      case 'rebound':
-        details = event.details.reboundType;
+      case EVENT_TYPE_REBOUND:
+        details = event.details?.reboundType || '';
         break;
-      case 'assist':
-        const assistedPlayer = players.find(p => p.id === event.details.assistedPlayer) || {};
+      case EVENT_TYPE_ASSIST:
+        const assistedPlayer = players.find(p => p.id === event.details?.assistedPlayer) || {};
         details = `to ${assistedPlayer.name || 'Player'}`;
         break;
       default:
@@ -62,7 +70,7 @@ const Dashboard = ({ events, players, onDeleteEvent }) => {
   // Handle confirmation before deleting an event
   const handleDeleteClick = (eventId) => {
     if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-      onDeleteEvent(eventId);
+      dispatch(deleteEvent(eventId));
     }
   };
 
@@ -236,17 +244,17 @@ const Dashboard = ({ events, players, onDeleteEvent }) => {
                       
                       return (
                         <tr key={event.id}>
-                          <td>{new Date(event.timestamp * 1000).toISOString().substr(11, 8)}</td>
-                          <td>{player.number} - {player.name}</td>
-                          <td>{event.eventType}</td>
+                          <td>{formatTime(event.timestamp)}</td>
+                          <td>{players.find(p => p.id === event.playerId)?.name || 'Unknown'}</td>
+                          <td>{event.type}</td>
                           <td>{details}</td>
                           <td>
                             <Button 
-                              variant="danger" 
-                              size="sm" 
+                              variant="outline-danger" 
+                              size="sm"
                               onClick={() => handleDeleteClick(event.id)}
                             >
-                              Delete
+                              <i className="bi bi-trash"></i> Delete
                             </Button>
                           </td>
                         </tr>

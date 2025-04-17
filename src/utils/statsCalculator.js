@@ -1,3 +1,12 @@
+import {
+  EVENT_TYPE_SHOT,
+  EVENT_TYPE_FREE_THROW,
+  EVENT_TYPE_REBOUND,
+  EVENT_TYPE_STEAL,
+  EVENT_TYPE_BLOCK,
+  EVENT_TYPE_TURNOVER,
+  EVENT_TYPE_ASSIST,
+} from '../constants/eventTypes';
 /**
  * Utility functions for calculating basketball statistics
  */
@@ -39,7 +48,7 @@ export const filterEventsByPlayer = (events, playerId) => {
 
 // Filter events by type
 export const filterEventsByType = (events, eventType) => {
-  return events.filter(event => event.eventType === eventType);
+  return events.filter(event => event.type === eventType);
 };
 
 // Get player stats from events
@@ -68,7 +77,7 @@ export const getPlayerStats = (events, playerId) => {
   };
   events.forEach(event => {
     if (
-      event.eventType === 'shot' &&
+      event.type === EVENT_TYPE_SHOT &&
       event.details &&
       event.details.assist === playerId
     ) {
@@ -79,8 +88,8 @@ export const getPlayerStats = (events, playerId) => {
   // Calculate stats from events
   playerEvents.forEach(event => {
     const details = event.details;
-    switch(event.eventType) {
-      case 'shot':
+    switch(event.type) {
+      case EVENT_TYPE_SHOT:
         stats.fgAttempted++;
         if (details.outcome === 'made') {
           stats.fgMade++;
@@ -93,14 +102,14 @@ export const getPlayerStats = (events, playerId) => {
           }
         }
         break;
-      case 'free-throw':
+      case EVENT_TYPE_FREE_THROW:
         stats.ftAttempted++;
         if (details.outcome === 'made') {
           stats.ftMade++;
           stats.points += 1;
         }
         break;
-      case 'rebound':
+      case EVENT_TYPE_REBOUND:
         stats.rebounds++;
         if (details.reboundType === 'offensive') {
           stats.offensiveRebounds++;
@@ -108,16 +117,16 @@ export const getPlayerStats = (events, playerId) => {
           stats.defensiveRebounds++;
         }
         break;
-      case 'assist':
+      case EVENT_TYPE_ASSIST:
         stats.assists++;
         break;
-      case 'steal':
+      case EVENT_TYPE_STEAL:
         stats.steals++;
         break;
-      case 'block':
+      case EVENT_TYPE_BLOCK:
         stats.blocks++;
         break;
-      case 'turnover':
+      case EVENT_TYPE_TURNOVER:
         stats.turnovers++;
         break;
       default:
@@ -160,8 +169,8 @@ export const getTeamStats = (events) => {
   // Calculate stats from events
   events.forEach(event => {
     const details = event.details;
-    switch(event.eventType) {
-      case 'shot':
+    switch(event.type) {
+      case EVENT_TYPE_SHOT:
         stats.fgAttempted++;
         if (details.outcome === 'made') {
           stats.fgMade++;
@@ -177,14 +186,14 @@ export const getTeamStats = (events) => {
           stats.assists++;
         }
         break;
-      case 'free-throw':
+      case EVENT_TYPE_FREE_THROW:
         stats.ftAttempted++;
         if (details.outcome === 'made') {
           stats.ftMade++;
           stats.points += 1;
         }
         break;
-      case 'rebound':
+      case EVENT_TYPE_REBOUND:
         stats.rebounds++;
         if (details.reboundType === 'offensive') {
           stats.offensiveRebounds++;
@@ -195,13 +204,13 @@ export const getTeamStats = (events) => {
       case 'assist':
         stats.assists++;
         break;
-      case 'steal':
+      case EVENT_TYPE_STEAL:
         stats.steals++;
         break;
-      case 'block':
+      case EVENT_TYPE_BLOCK:
         stats.blocks++;
         break;
-      case 'turnover':
+      case EVENT_TYPE_TURNOVER:
         stats.turnovers++;
         break;
       default:

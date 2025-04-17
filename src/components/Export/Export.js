@@ -1,9 +1,13 @@
 import React from 'react';
 import { Button, Card, Form } from 'react-bootstrap';
+import { useSelector } from 'react-redux';
 import { getPlayerStats, getTeamStats } from '../../utils/statsCalculator';
+import { EVENT_TYPE_SHOT, EVENT_TYPE_FREE_THROW, EVENT_TYPE_REBOUND, EVENT_TYPE_ASSIST } from '../../constants/eventTypes';
 import './Export.css';
 
-const Export = ({ events, players }) => {
+const Export = () => {
+  const events = useSelector(state => state.events.list);
+  const players = useSelector(state => state.players.list);
   // Export events as JSON
   const exportEventsAsJSON = () => {
     const dataStr = JSON.stringify({ events, players }, null, 2);
@@ -31,20 +35,20 @@ const Export = ({ events, players }) => {
       
       // Format details based on event type
       let details = '';
-      switch(event.eventType) {
-        case 'shot':
+      switch(event.type) {
+        case EVENT_TYPE_SHOT:
           details = `${event.details.shotType}, ${event.details.outcome}`;
           if (event.details.location) {
             details += `, location: (${event.details.location.x.toFixed(1)}, ${event.details.location.y.toFixed(1)})`;
           }
           break;
-        case 'free-throw':
+        case EVENT_TYPE_FREE_THROW:
           details = event.details.outcome;
           break;
-        case 'rebound':
+        case EVENT_TYPE_REBOUND:
           details = event.details.reboundType;
           break;
-        case 'assist':
+        case EVENT_TYPE_ASSIST:
           const assistedPlayer = players.find(p => p.id === event.details.assistedPlayer) || {};
           details = `to ${assistedPlayer.name || 'Unknown'}`;
           break;
@@ -56,7 +60,7 @@ const Export = ({ events, players }) => {
       details = details.replace(/,/g, ';');
       
       // Add row to CSV
-      csvContent += `${event.timestamp},${timeFormatted},${playerNumber} - ${playerName},${event.eventType},${details}\n`;
+      csvContent += `${event.timestamp},${timeFormatted},${playerNumber} - ${playerName},${event.type},${details}\n`;
     });
     
     downloadData(csvContent, 'basketball-events.csv', 'text/csv');

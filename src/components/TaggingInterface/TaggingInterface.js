@@ -1,17 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Form, Row, Col, Card, ListGroup, Badge, Toast, ToastContainer } from 'react-bootstrap';
 import { EVENT_TYPES, getEventTypeFromKey, formatTime } from '../../utils/eventManager';
+import { 
+  EVENT_TYPE_SHOT, 
+  EVENT_TYPE_REBOUND, 
+  EVENT_TYPE_FREE_THROW, 
+} from '../../constants/eventTypes';
+import { useSelector, useDispatch } from 'react-redux';
+import { setIsPaused } from '../../store/slices/videoSlice';
+import { addEvent } from '../../store/slices/eventsSlice';
 import CourtDiagram from './CourtDiagram';
 import GameTypeSelector from '../GameTypeSelector/GameTypeSelector';
 import './TaggingInterface.css';
 
-const TaggingInterface = ({ 
-  currentTime, 
-  onAddEvent, 
-  isPaused, 
-  setIsPaused,
-  players 
-}) => {
+const TaggingInterface = () => {
+  const currentTime = useSelector(state => state.video.currentTime);
+  const isPaused = useSelector(state => state.video.isPaused);
+  const players = useSelector(state => state.players.list);
+  const dispatch = useDispatch();
   const [showForm, setShowForm] = useState(false);
   const [eventType, setEventType] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -66,7 +72,7 @@ const TaggingInterface = ({
     // Create details object based on event type
     let details = {};
     
-    if (eventType === 'shot') {
+    if (eventType === EVENT_TYPE_SHOT) {
       details = {
         shotType,
         outcome: shotOutcome,
@@ -77,9 +83,15 @@ const TaggingInterface = ({
       if (shotOutcome === 'made' && assistingPlayer) {
         details.assist = assistingPlayer;
       }
-    } else if (eventType === 'rebound') {
+    } else if (eventType === EVENT_TYPE_REBOUND) {
       details = {
         reboundType,
+        gameType // Include game type in event details
+      };
+    } else if (eventType === EVENT_TYPE_FREE_THROW) {
+      details = {
+        shotType: '1-point',
+        outcome: shotOutcome,
         gameType // Include game type in event details
       };
     } else {
@@ -88,19 +100,15 @@ const TaggingInterface = ({
       }
     }
     
-    // Get player name for display
-    const playerName = players.find(p => p.id === selectedPlayer)?.name || selectedPlayer;
-    const assistName = players.find(p => p.id === assistingPlayer)?.name || '';
-    
     // Create event summary for recent events list
     const eventSummary = {
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
       type: eventType,
-      player: playerName,
-      time: currentTime,
+      playerId: selectedPlayer,
+      timestamp: currentTime,
       details: {
         ...details,
-        assist: assistingPlayer,
-        assistingPlayerName: assistName
+        assist: assistingPlayer
       }
     };
     
@@ -111,8 +119,8 @@ const TaggingInterface = ({
     setLastEventAdded(eventSummary);
     setShowToast(true);
     
-    // Call the onAddEvent function with the expected parameters
-    onAddEvent(eventType, selectedPlayer, currentTime, details);
+    // Call the addEvent function with the expected parameters
+    dispatch(addEvent(eventSummary));
     
     // Reset form
     setShowForm(false);
@@ -135,14 +143,15 @@ const TaggingInterface = ({
 
   // Format event for display
   const formatEventDisplay = (event) => {
-    let display = `${formatTime(event.time)} - ${event.player}: ${event.type}`;
+    let display = `${formatTime(event.timestamp)} - ${players.find(p => p.id === event.playerId)?.name || 'Unknown'}: ${event.type}`;
     
-    if (event.type === 'shot') {
+    if (event.type === EVENT_TYPE_SHOT || event.type === EVENT_TYPE_FREE_THROW) {
       display += ` (${event.details.shotType}, ${event.details.outcome})`;
-      if (event.details.assistingPlayerName) {
-        display += ` - Assist: ${event.details.assistingPlayerName}`;
+      if (event.details.assist) {
+        const assistPlayerName = players.find(p => p.id === event.details.assist)?.name || 'Unknown';
+        display += ` - Assist: ${assistPlayerName}`;
       }
-    } else if (event.type === 'rebound') {
+    } else if (event.type === EVENT_TYPE_REBOUND) {
       display += ` (${event.details.reboundType})`;
     }
     
@@ -243,18 +252,18 @@ const TaggingInterface = ({
                     <ListGroup.Item key={index} className="py-2 px-3">
                       <div className="d-flex align-items-center">
                         <Badge 
-                          bg={event.type === 'shot' ? 
+                          bg={event.type === EVENT_TYPE_SHOT || event.type === EVENT_TYPE_FREE_THROW ? 
                             (event.details.outcome === 'made' ? 'success' : 'danger') : 
                             'primary'} 
                           className="me-2"
                         >
-                          {formatTime(event.time)}
+                          {formatTime(event.timestamp)}
                         </Badge>
                         <div className="small">
-                          <strong>{event.player}</strong>: {event.type}
-                          {event.type === 'shot' && ` (${event.details.shotType}, ${event.details.outcome})`}
-                          {event.details.assistingPlayerName && (
-                            <span className="text-muted"> • Assist: {event.details.assistingPlayerName}</span>
+                          <strong>{players.find(p => p.id === event.playerId)?.name || 'Unknown'}</strong>: {event.type}
+                          {(event.type === EVENT_TYPE_SHOT || event.type === EVENT_TYPE_FREE_THROW) && ` (${event.details.shotType}, ${event.details.outcome})`}
+                          {event.details.assist && (
+                            <span className="text-muted"> • Assist: {players.find(p => p.id === event.details.assist)?.name || 'Unknown'}</span>
                           )}
                         </div>
                       </div>
@@ -311,7 +320,7 @@ const TaggingInterface = ({
                 </Col>
               </Row>
 
-              {eventType === 'shot' && (
+              {eventType === EVENT_TYPE_SHOT && (
                 <>
                   <Row className="mb-3">
                     <Col md={6}>
@@ -441,7 +450,37 @@ const TaggingInterface = ({
                 </>
               )}
 
-              {eventType === 'rebound' && (
+              {eventType === EVENT_TYPE_FREE_THROW && (
+                <Row className="mb-3">
+                  <Col>
+                    <Form.Group>
+                      <Form.Label>
+                        <strong>Free Throw Outcome</strong>
+                      </Form.Label>
+                      <div className="d-flex">
+                        <Button
+                          variant={shotOutcome === 'made' ? 'primary' : 'outline-primary'}
+                          className="w-100 me-2"
+                          onClick={() => setShotOutcome('made')}
+                          type="button"
+                        >
+                          Made
+                        </Button>
+                        <Button
+                          variant={shotOutcome === 'missed' ? 'primary' : 'outline-primary'}
+                          className="w-100"
+                          onClick={() => setShotOutcome('missed')}
+                          type="button"
+                        >
+                          Missed
+                        </Button>
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </Row>
+              )}
+
+              {eventType === EVENT_TYPE_REBOUND && (
                 <Row className="mb-3">
                   <Col>
                     <Form.Group>
@@ -470,15 +509,14 @@ const TaggingInterface = ({
                   </Col>
                 </Row>
               )}
-
               <div className="d-flex justify-content-end gap-2 mt-4">
                 <Button variant="secondary" onClick={handleCancel} type="button">
                   Cancel
                 </Button>
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   type="submit"
-                  disabled={!selectedPlayer || (eventType === 'shot' && !shotLocation)}
+                  disabled={!selectedPlayer || (eventType === EVENT_TYPE_SHOT && !shotLocation)}
                 >
                   <i className="bi bi-check-lg me-1"></i>
                   Save Event
