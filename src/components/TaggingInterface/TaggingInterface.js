@@ -302,20 +302,22 @@ const TaggingInterface = () => {
                     <Form.Label>
                       <strong>Player</strong>
                     </Form.Label>
-                    <Form.Control 
-                      as="select"
-                      value={selectedPlayer}
-                      onChange={(e) => setSelectedPlayer(e.target.value)}
-                      required
-                      className="form-select-lg"
-                    >
-                      <option value="">Select Player</option>
+                    <div className="player-chip-row" role="listbox" aria-label="Select Player">
                       {players.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          #{player.number} {player.name}
-                        </option>
+                        <button
+                          key={player.id}
+                          type="button"
+                          className={`player-chip${selectedPlayer === player.id ? ' selected' : ''}`}
+                          onClick={() => setSelectedPlayer(player.id)}
+                        >
+                          <span className="player-jersey">#{player.number}</span>
+                          <span className="player-name">{player.name}</span>
+                        </button>
                       ))}
-                    </Form.Control>
+                    </div>
+                    <div className="text-muted small mt-1" aria-live="polite">
+                      {selectedPlayer ? '' : 'Please select a player'}
+                    </div>
                   </Form.Group>
                 </Col>
               </Row>

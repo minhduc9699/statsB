@@ -71,10 +71,56 @@
   text-align: center;
 }
 
+/* Player chip selector styles */
+.player-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.player-chip {
+  display: flex;
+  align-items: center;
+  border: 2px solid #dee2e6;
+  background: #f8f9fa;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-shadow: none;
+  user-select: none;
+}
+.player-chip.selected, .player-chip:focus {
+  border-color: #0d6efd;
+  background: #e7f1ff;
+  box-shadow: 0 0 0 2px #b6d4fe;
+}
+.player-chip:hover {
+  border-color: #0d6efd;
+}
+.player-jersey {
+  font-weight: bold;
+  color: #0d6efd;
+  margin-right: 6px;
+  font-size: 1.05em;
+}
+.player-name {
+  color: #212529;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .event-button {
     min-width: 80px;
     font-size: 0.9rem;
+  }
+  .player-chip-row {
+    gap: 6px;
+  }
+  .player-chip {
+    font-size: 0.95rem;
+    padding: 5px 10px;
   }
 }
