@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectEvent } from '../../store/slices/eventsSlice';
+import { setCurrentTime } from '../../store/slices/videoSlice';
 import { EVENT_TYPE_SHOT, EVENT_TYPE_FREE_THROW, EVENT_TYPE_REBOUND, EVENT_TYPE_STEAL, EVENT_TYPE_BLOCK, EVENT_TYPE_TURNOVER } from '../../constants/eventTypes';
 import { OverlayTrigger, Tooltip, Badge } from 'react-bootstrap';
 import { formatTime } from '../../utils/eventManager';
@@ -196,7 +196,7 @@ const Timeline = () => {
                     left: `${(event.normalizedTime / effectiveVideoDuration) * 100}%`,
                     backgroundColor: getEventColor(event.type)
                   }}
-                  onClick={() => dispatch(selectEvent(event.id))}
+                  onClick={() => dispatch(setCurrentTime(event.timestamp))}
                 >
                   <i className={`bi ${getEventIcon(event.type)}`}></i>
                   {event.type === EVENT_TYPE_SHOT && event.details?.outcome === 'made' && 

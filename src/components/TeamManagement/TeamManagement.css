@@ -1,0 +1,71 @@
+.team-management {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px;
+}
+.team-editors {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.team-editor {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 320px;
+  max-width: 400px;
+  flex: 1 1 350px;
+}
+.team-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.team-header-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.player-list ul {
+  list-style: none;
+  padding: 0;
+}
+.player-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding: 4px 0;
+}
+.player-list li.in-game {
+  background: #e7f5ff;
+}
+.player-list li.bench {
+  background: #f8f9fa;
+}
+.captain-badge {
+  color: #0d6efd;
+  font-weight: bold;
+  margin-left: 4px;
+}
+.in-game-summary {
+  margin-top: 12px;
+  font-size: 0.95em;
+  color: #495057;
+}
+button {
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #bdbdbd;
+  background: #f1f3f5;
+  cursor: pointer;
+}
+button:disabled {
+  background: #e9ecef;
+  color: #adb5bd;
+  cursor: not-allowed;
+}

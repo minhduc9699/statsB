@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addPlayer, deletePlayer } from './store/slices/playersSlice';
 import { Container, Button, Modal, Form, Nav } from 'react-bootstrap';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { 
+  BrowserRouter as Router, 
+  Routes, 
+  Route, 
+  Link 
+} from 'react-router-dom';
+import TeamManagementPage from './pages/TeamManagementPage';
 import MainPage from './pages/MainPage';
 import DashboardPage from './pages/DashboardPage';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -48,7 +54,10 @@ function App() {
               <Nav.Item>
                 <Nav.Link as={Link} to="/dashboard">Dashboard & Export</Nav.Link>
               </Nav.Item>
-              <Nav.Item className="ms-auto">
+              <Nav.Item>
+              <Nav.Link as={Link} to="/teams">Team Management</Nav.Link>
+            </Nav.Item>
+            <Nav.Item className="ms-auto">
                 <Button 
                   variant="outline-primary" 
                   onClick={() => setShowPlayerModal(true)}
@@ -61,6 +70,7 @@ function App() {
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/teams" element={<TeamManagementPage />} />
           </Routes>
         </Container>
         {/* Player Management Modal */}

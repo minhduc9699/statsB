@@ -5,6 +5,7 @@
 - Video integration for event tagging
 - Shot distribution visualization
 - Game type selection (1v1 to 5v5)
+- Team management system
 
 ## Phase 1: MVP Enhancement (Next 3 Months)
 
@@ -73,6 +74,48 @@
    - Case studies
    - Success stories
    - Influencer partnerships
+
+## Phase 2: Admin Management System (Q3 2025)
+
+### Technical Requirements
+1. **Admin Dashboard**
+   - Role-based access control
+   - Team management interface
+   - Player management system
+   - Game scheduling system
+
+2. **Roster Management**
+   - Player profiles with stats
+   - Position assignments
+   - Player status tracking
+   - Team hierarchy management
+
+3. **Game Management**
+   - Game scheduling
+   - Score tracking
+   - Event tagging system
+   - Game statistics
+
+4. **Analytics**
+   - Team performance metrics
+   - Player statistics
+   - Game analysis
+   - Historical data tracking
+
+### Business Requirements
+1. **Subscription Tiers**
+   - Basic: Team management
+   - Pro: Game tracking
+   - Enterprise: Advanced analytics
+
+2. **Features**
+   - Team roster management
+   - Game scheduling
+   - Player statistics
+   - Team analytics
+
+## Phase 2: AI Integration (Q3 2025)
+- AI integration for automatic event tagging in video
 
 ## Phase 3: Enterprise Solutions (Q4 2025)
 

@@ -22,13 +22,21 @@ Roles are assigned to users during registration or by admins.
 API endpoints enforce role-based permissions (e.g., coaches can manage teams, players can view stats).
 Frontend dynamically shows/hides features based on user role.
 
-### Ticket 4: Develop Team Management System
-Description: Enable users (e.g., coaches) to create and manage teams, including adding players and assigning roles.
-Acceptance Criteria:
-Coaches can create teams with details (e.g., name, description).
-Coaches can invite players to teams via email or unique links.
-Team rosters can be updated (add/remove players).
-Team roles (e.g., captain) can be assigned.
+### Ticket 4: Develop Team Management System (Frontend Only, Mock Data)
+
+**Description:**  
+Implement the frontend logic and UI for team management. All data will be mocked on the client side (no backend integration). There will be exactly 2 teams, each with an unlimited roster, but only 5 players per team can be marked as "in the game" at any time.
+
+**Acceptance Criteria:**
+- Coaches can create and edit team details (e.g., name, description) via UI forms.
+- Each team can have an unlimited number of players in its roster (add/remove players via UI).
+- Coaches can assign team roles (e.g., captain) to players.
+- For each team, coaches can select up to 5 players as "active/in the game" at any time (UI enforces this limit).
+- All features use mock data (no backend/API calls).
+- UI displays both teams and their rosters, with a clear distinction between "in the game" and bench players.
+- All changes are reflected immediately in the UI state (no persistence required).
+- Use clear, intuitive UI/UX patterns for adding/removing players, editing team info, and toggling player status.
+- Player selection in event creation must be updated to only allow choosing from the 5 "in the game" players for each team.
 
 ### Ticket 5: Refactor Main App UI to Multiple Pages
 Description: Split the main application UI into multiple pages using a routing solution (e.g., React Router). Move the Dashboard and Export components to a dedicated page, and ensure smooth navigation between pages.
