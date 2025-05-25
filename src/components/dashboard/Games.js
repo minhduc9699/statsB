@@ -1,155 +1,291 @@
-import React from "react";
-import DashboardFilter from "./Filter";
+import React, { useState, useEffect } from "react";
+import matchAPI from "../../api/matchAPI";
+import { formatDate } from "../../utils/formatDate";
+import GamesFilter from "./filters/GamesFilter";
+
 import infoIcon from "../../assets/info-icon.png";
+import Play from "../../assets/play.png";
+import Edit from "../../assets/edit.png";
+import Delete from "../../assets/delete.png";
+
+const Bonston =
+  "https://upload.wikimedia.org/wikipedia/en/8/8f/Boston_Celtics.svg";
+const Golden =
+  "https://upload.wikimedia.org/wikipedia/en/0/01/Golden_State_Warriors_logo.svg";
 
 const Games = () => {
-  const matches = [
-    {
-      gameType: "5vs5",
-      date: "DEC 8 2021",
-      homeTeam: {
-        name: "Boston Celtics",
-        logo: "https://upload.wikimedia.org/wikipedia/en/8/8f/Boston_Celtics.svg",
-        score: 111,
-        points: "J. Tatum 29",
-        rebounds: "J. Tatum 10",
-        assists: "D. Schroder 8",
-        turnovers: "J. Tatum 6",
-      },
-      awayTeam: {
-        name: "Los Angeles Clippers",
-        logo: "https://upload.wikimedia.org/wikipedia/en/b/bb/LA_Clippers_logo.svg",
-        score: 114,
-        points: "B. Boston Jr. 27",
-        rebounds: "T. Mann 10",
-        assists: "R. Jackson 7",
-        turnovers: "R. Jackson 6",
-      },
-    },
-    {
-      gameType: "3vs3",
-      date: "DEC 8 2021",
-      homeTeam: {
-        name: "Portland Trail Blazers",
-        logo: "https://upload.wikimedia.org/wikipedia/en/2/21/Portland_Trail_Blazers_logo.svg",
-        score: 94,
-        points: "N. Powell 26",
-        rebounds: "J. Nurkic 13",
-        assists: "J. Nurkic 6",
-        turnovers: "J. Nurkic 5",
-      },
-      awayTeam: {
-        name: "Golden State Warriors",
-        logo: "https://upload.wikimedia.org/wikipedia/en/0/01/Golden_State_Warriors_logo.svg",
-        score: 104,
-        points: "S. Curry 22",
-        rebounds: "D. Green 10",
-        assists: "D. Green 8",
-        turnovers: "S. Curry 4",
-      },
-    },
-  ];
+  const [filters, setFilters] = useState({
+    gameType: "",
+    startDate: "",
+    endDate: "",
+    teamName: "",
+    resultType: "",
+    sortBy: "newest",
+  });
+  const [matchesList, setMatchesList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      await fetchMatches();
+      // await fetchTeams();
+    };
+    fetchAll();
+  }, []);
+
+  const fetchMatches = async () => {
+    try {
+      const res = await matchAPI.getAllMatches();
+      setMatchesList(res.data);
+      return res.data;
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    let filtered = [...matchesList];
+
+    // Lọc theo gameType
+    if (filters.gameType) {
+      filtered = filtered.filter((m) => m.gameType === filters.gameType);
+    }
+
+    // Lọc theo date
+    if (filters.startDate) {
+      filtered = filtered.filter(
+        (m) => new Date(m.date) >= new Date(filters.startDate)
+      );
+    }
+    if (filters.endDate) {
+      filtered = filtered.filter(
+        (m) => new Date(m.date) <= new Date(filters.endDate)
+      );
+    }
+
+    // Lọc theo team
+    if (filters.teamName) {
+      filtered = filtered.filter((m) =>
+        [m.homeTeam, m.awayTeam].some((t) =>
+          t.toLowerCase().includes(filters.teamName.toLowerCase())
+        )
+      );
+    }
+
+    // Lọc theo result
+    if (filters.resultType && filters.teamName) {
+      filtered = filtered.filter((match) => {
+        const isHome =
+          match.homeTeam.toLowerCase() === filters.teamName.toLowerCase();
+        const homeScore = match.teamStats.home.points;
+        const awayScore = match.teamStats.away.points;
+
+        let result =
+          homeScore === awayScore
+            ? "draw"
+            : homeScore > awayScore
+            ? "win"
+            : "lose";
+
+        if (!isHome) {
+          result =
+            result === "win" ? "lose" : result === "lose" ? "win" : "draw";
+        }
+
+        return result === filters.resultType;
+      });
+    }
+
+    // Sắp xếp
+    if (filters.sortBy === "newest") {
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (filters.sortBy === "oldest") {
+      filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+    } else if (filters.sortBy === "highestScore") {
+      filtered.sort(
+        (a, b) =>
+          b.teamStats.home.points +
+          b.teamStats.away.points -
+          (a.teamStats.home.points + a.teamStats.away.points)
+      );
+    } else if (filters.sortBy === "lowestScore") {
+      filtered.sort(
+        (a, b) =>
+          a.teamStats.home.points +
+          a.teamStats.away.points -
+          (b.teamStats.home.points + b.teamStats.away.points)
+      );
+    }
+
+    setMatchesList(filtered);
+  }, [filters]);
+
+  const isValidObject = (obj) =>
+    obj &&
+    typeof obj === "object" &&
+    !Array.isArray(obj) &&
+    Object.keys(obj).length > 0;
+
   return (
     <>
       <div className="bg-dark text-white font-roboto text-[14px] flex items-center justify-between px-[24px] py-[10px]">
-        <div className="">Match List</div>
-        <button className="bg-green flex items-center p-[12px] rounded-[10px]">
-          <img className="pr-[5px]" src={infoIcon} alt="info-icon" />
-          Creat New Match
+        <div className="">Matches List</div>
+        <button className="bg-green flex items-center p-[12px] rounded-[10px] space-x-[5px]">
+          <img className="w-[10px] h-[10px]" src={infoIcon} alt="info-icon" />
+          <span>Creat New Match</span>
         </button>
       </div>
-      <div className="grid grid-cols-12 gap-[6px] bg-white px-[24px]">
-        <div className="col-span-3">
-          <DashboardFilter />
+      <div className="grid grid-cols-12 gap-[6px] px-[24px] bg-gray-100 overflow-hidden">
+        <div className="col-span-2">
+          <GamesFilter filters={filters} onChange={setFilters} />
         </div>
-        <div className="col-span-9 matches-list">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100 text-tgray text-[12px]">
-                <th className="p-2">Game</th>
-                <th className="p-2">Score</th>
-                <th className="p-2">Points</th>
-                <th className="p-2">Rebounds</th>
-                <th className="p-2">Assists</th>
-                <th className="p-2">Turnovers</th>
-                <th className="p-2">GameType</th>
-                <th className="p-2">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matches.map((match, index) => (
-                <React.Fragment key={index}>
-                  {/* Home Team */}
-                  <tr className="odd:bg-gray-100 even:bg-white">
-                    <td className="p-2 flex items-center space-x-2">
-                      <img
-                        src={match.homeTeam.logo}
-                        alt={match.homeTeam.name}
-                        className="h-8 w-8"
-                      />
-                      <span>{match.homeTeam.name}</span>
-                    </td>
-                    <td className="p-2 text-center font-bold">
-                      {match.homeTeam.score}
-                    </td>
-                    <td className="p-2 text-center">{match.homeTeam.points}</td>
-                    <td className="p-2 text-center">
-                      {match.homeTeam.rebounds}
-                    </td>
-                    <td className="p-2 text-center">
-                      {match.homeTeam.assists}
-                    </td>
-                    <td className="p-2 text-center">
-                      {match.homeTeam.turnovers}
-                    </td>
-                    <td
-                      rowSpan={2}
-                      className="p-2 text-center font-bold bg-gray-200"
-                    >
-                      {match.gameType}
-                    </td>
-                    <td rowSpan={2} className="p-2 text-center">
-                      <button className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* Divider */}
-                  <tr>
-                    <td colSpan={6} className="p-0">
-                      <div className="h-1px w-full bg-gray-300"></div>
-                    </td>
-                  </tr>
-
-                  {/* Away Team */}
-                  <tr className="odd:bg-gray-100 even:bg-white">
-                    <td className="p-2 flex items-center space-x-2">
-                      <img
-                        src={match.awayTeam.logo}
-                        alt={match.awayTeam.name}
-                        className="h-8 w-8"
-                      />
-                      <span>{match.awayTeam.name}</span>
-                    </td>
-                    <td className="p-2 text-center font-bold">
-                      {match.awayTeam.score}
-                    </td>
-                    <td className="p-2 text-center">{match.awayTeam.points}</td>
-                    <td className="p-2 text-center">
-                      {match.awayTeam.rebounds}
-                    </td>
-                    <td className="p-2 text-center">
-                      {match.awayTeam.assists}
-                    </td>
-                    <td className="p-2 text-center">
-                      {match.awayTeam.turnovers}
-                    </td>
-                  </tr>
-                </React.Fragment>
+        <div className="col-span-10 matches-list">
+          {matchesList.length > 0 && (
+            <div>
+              <div className="bg-gray-100 text-tgray font-bold text-[14px] p-2 w-full grid grid-cols-12  p-[10px]">
+                <div className="flex items-center justify-center col-span-1"></div>
+                <div className="flex items-center justify-center col-span-2">
+                  Game
+                </div>
+                <div className="flex items-center justify-center col-span-1">
+                  Score
+                </div>
+                <div className="flex items-center justify-center col-span-2">
+                  Points
+                </div>
+                <div className="flex items-center justify-center col-span-2">
+                  Rebounds
+                </div>
+                <div className="flex items-center justify-center col-span-2">
+                  Assists
+                </div>
+                <div className="flex items-center justify-center col-span-2"></div>
+              </div>
+              {matchesList.map((match, index) => (
+                <div
+                  key={index}
+                  className="match-item p-[10px] my-[8px] bg-white shadow-lg group cursor-pointer hover:scale-[1.02] transition duration-300 ease-in-out"
+                >
+                  <div className="grid grid-cols-12">
+                    <div className="flex flex-col items-center justify-center text-tgray text-[12px] w-full space-y-[6px] col-span-1">
+                      <div className="flex items-center justify-center text-dark text-[14px]">
+                        {match.gameType}
+                      </div>
+                      <div className="flex items-center justify-center">
+                        {formatDate(match.createdAt)}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center justify-center col-span-2 relative">
+                      <span className="text-[12px] absolute -top-[8px] right-0 text-tgray flex items-center justify-center w-full">
+                        Read&Go League
+                      </span>
+                      <span className="text-[12px] flex items-center justify-start space-x-[10px] py-[8px] w-full border-b border-bordergray">
+                        <img
+                          src={Bonston}
+                          alt="team-logo"
+                          className="h-[40px]"
+                        />
+                        <div className="text-[14px] font-bold">
+                          Golden State Warriors
+                        </div>
+                      </span>
+                      <span className="text-[12px] flex items-center justify-start space-x-[10px] py-[8px] w-full">
+                        <img
+                          src={Golden}
+                          alt="team-logo"
+                          className="h-[40px]"
+                        />
+                        <div className="text-[14px] font-bold">
+                          Boston Celtics
+                        </div>
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center col-span-1">
+                      <span className="text-[20px] font-bold flex items-center justify-center py-[8px] w-full border-b border-bordergray">
+                        {match.teamStats?.home?.points}
+                      </span>
+                      <span className="text-[20px] font-bold flex items-center justify-center py-[8px] w-full">
+                        {match.teamStats?.away?.points}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center col-span-2">
+                      <span className="flex items-center justify-start py-[8px] w-full border-b border-bordergray">
+                        <span className="text-[12px] text-tgray">
+                          Leo Messi{" "}
+                        </span>{" "}
+                        - 23
+                        {/* {match.playerStats.home[0].points} */}
+                      </span>
+                      <span className="flex items-center justify-start py-[8px] w-full">
+                        <span className="text-[12px] text-tgray">
+                          Kobe Bryant{" "}
+                        </span>{" "}
+                        - 30
+                        {/* {match.playerStats.away[0].points} */}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center col-span-2">
+                      <span className="flex items-center justify-start py-[8px] w-full border-b border-bordergray">
+                        <span className="text-[12px] text-tgray">
+                          Brent Tillman-King{" "}
+                        </span>{" "}
+                        - 5{/* {match.playerStats.away[0].rebounds} */}
+                      </span>
+                      <span className="flex items-center justify-start py-[8px] w-full">
+                        <span className="text-[12px] text-tgray">
+                          Ida Grimes{" "}
+                        </span>{" "}
+                        - 8{/* {match.playerStats.away[0].rebounds} */}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center col-span-2">
+                      <span className="flex items-center justify-start py-[8px] w-full border-b border-bordergray">
+                        <span className="text-[12px] text-tgray">
+                          Dr. Susan Bins{" "}
+                        </span>{" "}
+                        - 2{/* {match.playerStats.away[0].assists} */}
+                      </span>
+                      <span className="flex items-center justify-start py-[8px] w-full">
+                        <span className="text-[12px] text-tgray">
+                          Nichole Treutel I{" "}
+                        </span>{" "}
+                        - 1{/* {match.playerStats.away[0].assists} */}
+                      </span>
+                    </div>
+                    <div className="relative flex flex-col items-center justify-center col-span-2 space-y-[4px]">
+                      <div className="px-[8px] hidden group-hover:block">
+                        <div className="flex items-center justify-start space-x-[6px] w-full">
+                          <img src={Play} alt="play" className="w-[14px]" />
+                          <div className="text-tgray text-[14px] hover:text-dark">
+                            Full Game Video
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-start space-x-[6px] w-full">
+                          <img src={Play} alt="play" className="w-[14px]" />
+                          <div className="text-tgray text-[14px] hover:text-dark">
+                            All Highlight
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-start space-x-[6px] w-full">
+                          <img src={Edit} alt="play" className="w-[14px]" />
+                          <div className="text-tgray text-[14px] hover:text-dark">
+                            Edit this match
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-start space-x-[6px] w-full">
+                          <img src={Delete} alt="play" className="w-[14px]" />
+                          <div className="text-[#ff7171] text-[14px] hover:text-dark">
+                            Delete
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
         </div>
       </div>
     </>
