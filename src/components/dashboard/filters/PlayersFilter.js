@@ -39,6 +39,23 @@ const PlayersFilter = ({ filters, onChange }) => {
           </div>
         </div>
 
+        <div className="position">
+          <div className="text-[16px] pb-[8px] text-start">Position</div>
+          {/* Sort Options */}
+          <select
+            name="position"
+            onChange={handleChange}
+            value={filters.sortBy}
+            className="p-2 border rounded shadow-lg w-full"
+          >
+            <option value="points">SG</option>
+            <option value="assists">C</option>
+            <option value="rebounds">PF</option>
+            <option value="rebounds">SF</option>
+            <option value="rebounds">PG</option>
+          </select>
+        </div>
+
         <div className="points">
           <div className="text-[16px] pb-[8px] text-start">
             Points Range: {filters.minPoints ? filters.minPoints : "00"} -{" "}

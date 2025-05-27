@@ -19,11 +19,12 @@ const Teams = () => {
     minLosts: "",
     sortBy: "",
   });
+  const [currentTeamId, setCurrentTeamId] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
       await fetchTeams();
-      // await fetchTeams();
     };
     fetchAll();
   }, []);
@@ -38,6 +39,17 @@ const Teams = () => {
     }
   };
 
+  const popUpDelete = (id) => {
+    setCurrentTeamId(id);
+    setIsOpen(true);
+  };
+
+  const onConfirmDelete = async () => {
+    await teamAPI.deleteTeam(currentTeamId);
+    await fetchTeams();
+    setIsOpen(false);
+  };
+
   const isValidObject = (obj) =>
     obj &&
     typeof obj === "object" &&
@@ -50,7 +62,7 @@ const Teams = () => {
         <div className="">Teams List</div>
         <button className="bg-green flex items-center p-[12px] rounded-[10px] space-x-[5px]">
           <img className="w-[10px] h-[10px]" src={infoIcon} alt="info-icon" />
-          <span>Creat New Team</span>
+          <span>Create New Team</span>
         </button>
       </div>
       <div className="grid grid-cols-12 gap-[6px] px-[24px] bg-gray-100 overflow-hidden">
@@ -148,8 +160,10 @@ const Teams = () => {
                       {formatDate(team.createdAt)}
                     </div>
                     <div className="flex items-center justify-center col-span-1">
-                      <div className="flex items-center justify-center space-x-[10px]">
-                        <div></div>
+                      <div
+                        onClick={() => popUpDelete(team._id)}
+                        className="flex items-center justify-center space-x-[10px]"
+                      >
                         <img
                           src={Delete}
                           alt="delete-icon"
@@ -164,6 +178,35 @@ const Teams = () => {
           )}
         </div>
       </div>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded p-6 shadow-lg w-[300px]">
+            <h2 className="text-lg font-semibold mb-4">
+              Xác nhận xoá đội bóng
+            </h2>
+            <p className="mb-6 text-sm text-gray-700">
+              Bạn có chắc chắn muốn xoá đội bóng này không? Hành động này không
+              thể hoàn tác.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+                onClick={() => setIsOpen(false)}
+              >
+                Huỷ
+              </button>
+              <button
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                onClick={() => onConfirmDelete()}
+              >
+                Xoá
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

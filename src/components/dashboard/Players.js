@@ -20,6 +20,8 @@ const Players = () => {
     minRebounds: "",
     sortBy: "",
   });
+  const [currentPlayerId, setCurrentPlayerId] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -89,6 +91,17 @@ const Players = () => {
     fetchPlayers();
   }, [filters]);
 
+  const popUpDelete = (id) => {
+    setCurrentPlayerId(id);
+    setIsOpen(true);
+  };
+
+  const onConfirmDelete = async () => {
+    await playerAPI.deletePlayer(currentPlayerId);
+    await fetchPlayers();
+    setIsOpen(false);
+  };
+
   const isValidObject = (obj) =>
     obj &&
     typeof obj === "object" &&
@@ -101,7 +114,7 @@ const Players = () => {
         <div className="">Teams List</div>
         <button className="bg-green flex items-center p-[12px] rounded-[10px] space-x-[5px]">
           <img className="w-[10px] h-[10px]" src={infoIcon} alt="info-icon" />
-          <span>Creat New Team</span>
+          <span>Create New Team</span>
         </button>
       </div>
       <div className="grid grid-cols-12 gap-[6px] px-[24px] bg-gray-100 overflow-hidden">
@@ -137,7 +150,7 @@ const Players = () => {
                 >
                   <div className="grid grid-cols-12">
                     <div className="flex items-center justify-start space-x-[20px] col-span-4">
-                      <img src={Curry} alt="player" className="h-[50px]" />
+                      <img src={Curry} alt="player" className="h-[70px]" />
                       <span className="text-[14px] font-bold">
                         {player.name}
                       </span>
@@ -159,7 +172,10 @@ const Players = () => {
                       Read&Go League
                     </div>
                     <div className="flex items-center justify-center col-span-1">
-                      <div className="flex items-center justify-center space-x-[10px]">
+                      <div
+                        onClick={() => popUpDelete(player._id)}
+                        className="flex items-center justify-center space-x-[10px]"
+                      >
                         <img
                           src={Delete}
                           alt="delete-icon"
@@ -174,6 +190,33 @@ const Players = () => {
           )}
         </div>
       </div>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded p-6 shadow-lg w-[300px]">
+            <h2 className="text-lg font-semibold mb-4">Xác nhận xoá cầu thủ</h2>
+            <p className="mb-6 text-sm text-gray-700">
+              Bạn có chắc chắn muốn xoá cầu thủ này không? Hành động này không
+              thể hoàn tác.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+                onClick={() => setIsOpen(false)}
+              >
+                Huỷ
+              </button>
+              <button
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                onClick={() => onConfirmDelete()}
+              >
+                Xoá
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
