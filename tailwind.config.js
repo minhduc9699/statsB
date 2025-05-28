@@ -10,6 +10,8 @@ export default {
         dark: "#0C0C16",
         tgray: "#868e96",
         green: "#2CAE32",
+        bordergray: "#E9ECEF",
+        studiobg: "#151524",
       },
       fontFamily: {
         epilogue: ['"Epilogue"', "serif"],

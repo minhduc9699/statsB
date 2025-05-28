@@ -9,7 +9,10 @@ const Navbar = () => {
 
   return (
     <nav className="w-full px-[24px] flex justify-between items-center bg-dark pt-[23px] border-b border-tgray">
-      <div className="navbar-logo flex items-center space-x-[10px] pb-[20px]">
+      <div
+        onClick={() => navigate("/")}
+        className="navbar-logo flex items-center space-x-[10px] pb-[20px] cursor-pointer"
+      >
         <img
           src={logo}
           alt="navbar-logo"
