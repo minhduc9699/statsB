@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { addVideo, setCurrentVideoIndex, resetVideo, setCurrentTime, setIsPlaying, renameVideo, setDuration } from "../../store/videoSlide";
 
 import fiveBackward from "../../assets/video-player/5-seconds-backward.png";
 import tenBackward from "../../assets/video-player/10-seconds-backward.png";
@@ -8,17 +9,19 @@ import tenForward from "../../assets/video-player/10-seconds-forward.png";
 import play from "../../assets/video-player/play.png";
 import pause from "../../assets/video-player/pause.png";
 
-const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
+const VideoPlayerArea = () => {
+  const videos = useSelector((state) => state.video.videos);
+  const currentVideoIndex = useSelector((state) => state.video.currentVideoIndex);
+  const currentTime = useSelector((state) => state.video.currentTime);
+  const duration = useSelector((state) => state.video.duration);
+  const isPlaying = useSelector((state) => state.video.isPlaying);
+
   const containerRef = useRef(null);
-  const [videos, setVideos] = useState([]); // playlist of { src, fileName }
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(true);
   const [renamingIndex, setRenamingIndex] = useState(null);
   const [renameText, setRenameText] = useState("");
+  const videoRef = useRef(null);
   const videoSrc = videos[currentVideoIndex]?.src;
 
   const dispatch = useDispatch();
@@ -27,14 +30,14 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
     const file = e.target.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      const newVideo = { src: url, fileName: file.name };
-      setVideos((prev) => [...prev, newVideo]);
+      dispatch(addVideo({ src: url, fileName: file.name }));
+      console.log(videos)
       if (videos.length === 0) setCurrentVideoIndex(0);
     }
   };
 
   const moveVideo = (fromIdx, toIdx) => {
-    setVideos((prev) => {
+    addVideo((prev) => {
       const updated = [...prev];
       const [moved] = updated.splice(fromIdx, 1);
       updated.splice(toIdx, 0, moved);
@@ -48,7 +51,7 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
   };
 
   const applyRename = () => {
-    setVideos((prev) => {
+    addVideo((prev) => {
       const updated = [...prev];
       updated[renamingIndex].fileName = renameText;
       return updated;
@@ -57,7 +60,7 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
   };
 
   const deleteVideo = (index) => {
-    setVideos((prev) => {
+    addVideo((prev) => {
       const updated = [...prev];
       updated.splice(index, 1);
       return updated;
@@ -72,16 +75,16 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
     if (!video) return;
     if (video.paused) {
       video.play();
-      setIsPlaying(true);
+      dispatch(setIsPlaying(true));
     } else {
       video.pause();
-      setIsPlaying(false);
+      dispatch(setIsPlaying(false));
     }
   };
 
   useEffect(() => {
     if (videoRef.current) {
-      setIsPlaying(false);
+      dispatch(setIsPlaying(false));
     }
   }, [videoSrc]);
 
@@ -97,20 +100,18 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
     if (!video) return;
     video.currentTime += seconds;
   };
+  
 
-  const handleTimeUpdate = () => {
+  const handleUpdateTime = ()  => {
     const video = videoRef.current;
     if (!video) return;
-    const current = video.currentTime;
-    setCurrentTime(current);
-    if (onTimeUpdate) onTimeUpdate(current);
-    if (current >= video.duration) {
-      setIsPlaying(false);
-    }
+    dispatch(setCurrentTime(video.currentTime));
   };
 
+
   const handleLoadedMetadata = () => {
-    setDuration(videoRef.current.duration);
+    const video = videoRef.current;
+    dispatch(setDuration(videoRef.current.duration));
   };
 
   useEffect(() => {
@@ -144,7 +145,7 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
       {videos.length > 0 && (
         <div className="absolute top-2 left-2 bg-gray-900/80 p-2 rounded text-sm z-10">
           <label className="block mb-1 text-gray-300 font-semibold">
-            Video Playlist {currentVideoIndex + 1}/{videos.length}
+            {/* Video Playlist {currentVideoIndex + 1}/{videos.length} */}
           </label>
           <input
             type="file"
@@ -156,11 +157,10 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
             {videos.map((v, i) => (
               <li
                 key={i}
-                className={`flex items-center justify-between px-2 py-1 mb-1 rounded cursor-pointer ${
-                  i === currentVideoIndex
-                    ? "bg-gray-700"
-                    : "bg-dark hover:bg-gray-600"
-                }`}
+                className={`flex items-center justify-between px-2 py-1 mb-1 rounded cursor-pointer ${i === currentVideoIndex
+                  ? "bg-gray-700"
+                  : "bg-dark hover:bg-gray-600"
+                  }`}
                 onClick={() => setCurrentVideoIndex(i)}
               >
                 {renamingIndex === i ? (
@@ -232,7 +232,7 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
           <video
             ref={videoRef}
             src={videoSrc}
-            onTimeUpdate={handleTimeUpdate}
+            onTimeUpdate={handleUpdateTime}
             onLoadedMetadata={handleLoadedMetadata}
             className="w-full h-auto"
             controls={false}

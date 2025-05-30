@@ -2,8 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   videos: [], // { id, file, name, duration }
-  currentVideoId: null,
+  currentVideoIndex: 0,
   currentTime: 0,
+  duration: 0,
   isPlaying: false,
 };
 
@@ -11,11 +12,12 @@ const videoSlide = createSlice({
   name: "video",
   initialState,
   reducers: {
-    setVideos: (state, action) => {
-      state.videos = action.payload;
-    },
     addVideo: (state, action) => {
+      console.log(action);
       state.videos.push(action.payload);
+    },
+    setCurrentVideoIndex: (state, action) => {
+      state.currentVideoIndex = action.payload;
     },
     renameVideo: (state, action) => {
       const { id, name } = action.payload;
@@ -25,7 +27,9 @@ const videoSlide = createSlice({
     setCurrentTime: (state, action) => {
       state.currentTime = action.payload;
     },
+    setDuration: (state, action) => { state.duration = action.payload; },
     setIsPlaying: (state, action) => {
+      console.log(action);
       state.isPlaying = action.payload;
     },
     resetVideo: (state) => {
@@ -36,10 +40,11 @@ const videoSlide = createSlice({
 });
 
 export const {
-  setVideos,
   addVideo,
+  setCurrentVideoIndex,
   renameVideo,
   setCurrentTime,
+  setDuration,
   setIsPlaying,
   resetVideo,
 } = videoSlide.actions;
