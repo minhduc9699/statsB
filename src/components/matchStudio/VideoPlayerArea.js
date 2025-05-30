@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
 import fiveBackward from "../../assets/video-player/5-seconds-backward.png";
 import tenBackward from "../../assets/video-player/10-seconds-backward.png";
@@ -18,8 +19,9 @@ const VideoPlayerArea = ({ videoRef, onTimeUpdate, onDurationChange }) => {
   const [showControls, setShowControls] = useState(true);
   const [renamingIndex, setRenamingIndex] = useState(null);
   const [renameText, setRenameText] = useState("");
-
   const videoSrc = videos[currentVideoIndex]?.src;
+
+  const dispatch = useDispatch();
 
   const handleUpload = (e) => {
     const file = e.target.files[0];
