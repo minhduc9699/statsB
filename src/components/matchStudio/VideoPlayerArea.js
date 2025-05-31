@@ -191,7 +191,7 @@ const VideoPlayerArea = () => {
             {videos.map((video, i) => (
               <li
                 key={i}
-                className={`flex items-center justify-between px-2 py-1 mb-1 rounded cursor-pointer ${
+                className={`flex items-center text-white justify-between px-2 py-1 mb-1 rounded cursor-pointer ${
                   i === currentVideoIndex
                     ? "bg-gray-700"
                     : "bg-dark hover:bg-gray-600"
@@ -273,8 +273,18 @@ const VideoPlayerArea = () => {
 
       {/* Upload if empty */}
       {videos.length === 0 && (
-        <div className="border border-dashed border-gray-500 p-8 text-center">
-          <input type="file" accept="video/*" onChange={handleUpload} />
+        <div className="border border-dashed border-gray-500 h-full flex items-center justify-center">
+          <input
+            type="file"
+            accept="video/*"
+            onChange={handleUpload}
+            className="block text-sm text-slate-500
+             file:mr-4 file:py-2 file:px-4
+             file:rounded-full file:border-0
+             file:text-sm file:font-semibold
+             file:bg-violet-50 file:text-violet-700
+             hover:file:bg-violet-100 cursor-pointer"
+          />
         </div>
       )}
 
