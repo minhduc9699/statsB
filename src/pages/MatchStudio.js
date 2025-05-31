@@ -53,20 +53,12 @@ const MatchStudio = () => {
         <div className="match-studio-container grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
           <div className="col-span-9 h-full">
             <div className="h-2/3">
-              <VideoPlayerArea
-                videoRef={videoRef}
-                onTimeUpdate={setCurrentTime}
-                onDurationChange={setDuration}
-              />
+              <VideoPlayerArea />
             </div>
 
-            <TimelineTracker
-              duration={duration}
-              currentTime={currentTime}
-              events={events}
-              onSeek={handleSeek}
-              onSelectEvent={(e) => handleSeek(e.time)}
-            />
+            <div className="h-1/3">
+              <TimelineTracker />
+            </div>
           </div>
           <div className="col-span-3 h-full"></div>
         </div>
