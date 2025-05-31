@@ -41,7 +41,7 @@ const MatchStudio = () => {
   return (
     <>
       <div className="bg-studiobg">
-        <div className="bg-dark text-white font-roboto text-[14px] flex items-center justify-between px-[24px] py-[10px]">
+        <div className="bg-dark text-white font-roboto text-[14px] flex items-center justify-between px-[24px] py-[10px] h-[70px]">
           <div className="">
             Matches List/ {matchId ? "Edit Match" : "Create New Match"}
           </div>
@@ -50,13 +50,15 @@ const MatchStudio = () => {
             <span>View Dashboard</span>
           </button>
         </div>
-        <div className="grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
-          <div className="col-span-9">
-            <VideoPlayerArea
-              videoRef={videoRef}
-              onTimeUpdate={setCurrentTime}
-              onDurationChange={setDuration}
-            />
+        <div className="match-studio-container grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
+          <div className="col-span-9 h-full">
+            <div className="h-2/3">
+              <VideoPlayerArea
+                videoRef={videoRef}
+                onTimeUpdate={setCurrentTime}
+                onDurationChange={setDuration}
+              />
+            </div>
 
             <TimelineTracker
               duration={duration}
@@ -66,7 +68,7 @@ const MatchStudio = () => {
               onSelectEvent={(e) => handleSeek(e.time)}
             />
           </div>
-          <div className="col-span-3"></div>
+          <div className="col-span-3 h-full"></div>
         </div>
       </div>
     </>

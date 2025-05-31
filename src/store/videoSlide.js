@@ -13,28 +13,44 @@ const videoSlide = createSlice({
   initialState,
   reducers: {
     addVideo: (state, action) => {
-      console.log(action);
       state.videos.push(action.payload);
     },
     setCurrentVideoIndex: (state, action) => {
       state.currentVideoIndex = action.payload;
     },
+    moveVideo: (state, action) => {
+      const { fromIdx, toIdx } = action.payload;
+      if (
+        fromIdx < 0 ||
+        fromIdx >= state.videos.length ||
+        toIdx < 0 ||
+        toIdx >= state.videos.length ||
+        fromIdx === toIdx
+      ) {
+        return;
+      }
+
+      const updated = [...state.videos];
+      const [movedVideo] = updated.splice(fromIdx, 1);
+      updated.splice(toIdx, 0, movedVideo);
+      state.videos = updated;
+    },
     renameVideo: (state, action) => {
       const { id, name } = action.payload;
-      const video = state.videos.find((v) => v.id === id);
-      if (video) video.name = name;
+      state.videos[id].name = name;
+    },
+    deleteVideo: (state, action) => {
+      const { id } = action.payload;
+      state.videos.splice(id, 1);
     },
     setCurrentTime: (state, action) => {
       state.currentTime = action.payload;
     },
-    setDuration: (state, action) => { state.duration = action.payload; },
-    setIsPlaying: (state, action) => {
-      console.log(action);
-      state.isPlaying = action.payload;
+    setDuration: (state, action) => {
+      state.duration = action.payload;
     },
-    resetVideo: (state) => {
-      state.currentTime = 0;
-      state.isPlaying = false;
+    setIsPlaying: (state, action) => {
+      state.isPlaying = action.payload;
     },
   },
 });
@@ -42,10 +58,11 @@ const videoSlide = createSlice({
 export const {
   addVideo,
   setCurrentVideoIndex,
+  moveVideo,
   renameVideo,
+  deleteVideo,
   setCurrentTime,
   setDuration,
   setIsPlaying,
-  resetVideo,
 } = videoSlide.actions;
 export default videoSlide.reducer;
