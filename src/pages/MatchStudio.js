@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import matchAPI from "../api/matchAPI";
 import VideoPlayerArea from "../components/matchStudio/VideoPlayerArea";
 import TimelineTracker from "../components/matchStudio/TimelineTracker";
+import EventInputPanel from "../components/matchStudio/EventInputPanel";
 
 import infoIcon from "../assets/info-icon.png";
 
@@ -41,7 +42,7 @@ const MatchStudio = () => {
   return (
     <>
       <div className="bg-studiobg">
-        <div className="bg-dark text-white font-roboto text-[14px] flex items-center justify-between px-[24px] py-[10px]">
+        <div className="bg-dark text-white font-roboto text-[14px] flex items-center justify-between px-[24px] py-[10px] h-[70px]">
           <div className="">
             Matches List/ {matchId ? "Edit Match" : "Create New Match"}
           </div>
@@ -50,23 +51,19 @@ const MatchStudio = () => {
             <span>View Dashboard</span>
           </button>
         </div>
-        <div className="grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
-          <div className="col-span-9">
-            <VideoPlayerArea
-              videoRef={videoRef}
-              onTimeUpdate={setCurrentTime}
-              onDurationChange={setDuration}
-            />
+        <div className="match-studio-container grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
+          <div className="col-span-9 h-full">
+            <div className="h-2/3">
+              <VideoPlayerArea />
+            </div>
 
-            <TimelineTracker
-              duration={duration}
-              currentTime={currentTime}
-              events={events}
-              onSeek={handleSeek}
-              onSelectEvent={(e) => handleSeek(e.time)}
-            />
+            <div className="h-1/3">
+              <TimelineTracker />
+            </div>
           </div>
-          <div className="col-span-3"></div>
+          <div className="col-span-3 h-full">
+            <EventInputPanel />
+          </div>
         </div>
       </div>
     </>
