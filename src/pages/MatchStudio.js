@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import matchAPI from "../api/matchAPI";
 import VideoPlayerArea from "../components/matchStudio/VideoPlayerArea";
 import TimelineTracker from "../components/matchStudio/TimelineTracker";
+import EventInputPanel from "../components/matchStudio/EventInputPanel";
 
 import infoIcon from "../assets/info-icon.png";
 
@@ -60,7 +61,9 @@ const MatchStudio = () => {
               <TimelineTracker />
             </div>
           </div>
-          <div className="col-span-3 h-full"></div>
+          <div className="col-span-3 h-full">
+            <EventInputPanel />
+          </div>
         </div>
       </div>
     </>
