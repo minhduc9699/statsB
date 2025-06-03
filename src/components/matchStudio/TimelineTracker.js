@@ -9,11 +9,19 @@ const eventTypes = [
   { type: "TURNOVER", color: "bg-red-400", icon: "💥" },
 ];
 
-const TimelineTracker = ({ events, onSeek, onSelectEvent }) => {
+const mockEvents = [
+  { id: 'e1', start: 10, end: 15, eventType: '2PT', eventDetail: 'Fast break' },
+  { id: 'e2', start: 25, end: 27, eventType: 'TURNOVER', eventDetail: 'Bad pass' },
+  { id: 'e3', start: 32, end: 38, eventType: 'REBOUND', eventDetail: 'Offensive' },
+  { id: 'e4', start: 44, end: 47, eventType: '3PT', eventDetail: 'Corner shot' },
+];
+
+const TimelineTracker = ({ events = mockEvents, onSeek, onSelectEvent }) => {
   const currentTime = useSelector((state) => state.video.currentTime);
   const duration = useSelector((state) => state.video.duration);
 
   const onAddEvent = () => {};
+
   return (
     <div className="w-full p-2 h-full flex flex-col">
       {/* Event Type Selector */}
@@ -50,25 +58,29 @@ const TimelineTracker = ({ events, onSeek, onSelectEvent }) => {
           style={{ left: `${(currentTime / duration) * 100}%` }}
         />
 
-        {/* Event Markers */}
-        {/* {events.map((event) => {
-          const evType = eventTypes.find((e) => e.type === event.type);
+        {/* Event Markers as ranges */}
+        {events.map((event) => {
+          const type = eventTypes.find((et) => et.type === event.eventType);
+          const startPercent = (event.start / duration) * 100;
+          const endPercent = (event.end / duration) * 100;
+          const widthPercent = endPercent - startPercent;
+
           return (
             <div
               key={event.id}
-              title={`${event.type} - ${Math.floor(event.time)}s`}
-              className={`absolute top-[14px] w-4 h-4 rounded-md cursor-pointer ${evType?.color || 'bg-gray-400'}`}
-              style={{ left: `${(event.time / duration) * 100}%` }}
+              title={`${event.eventType} - ${event.eventDetail}`}
+              className={`absolute top-[12px] h-[20px] ${type?.color || 'bg-dark'} rounded-md cursor-pointer`}
+              style={{ left: `${startPercent}%`, width: `${widthPercent}%` }}
               onClick={() => onSelectEvent(event)}
             >
-              <span className="text-[12px]">{evType?.icon}</span>
+              <span className="text-[10px] pl-1">{type?.icon}</span>
             </div>
           );
-        })} */}
+        })}
       </div>
 
-      {/* Time display + Add Event */}
-      <div className="flex justify-between items-center text-[#ADB5BD]">
+      {/* Time Ruler */}
+      <div className="flex justify-between items-center text-[#ADB5BD] text-xs mt-1">
         <span>0:00</span>
         <span>{formatTime(duration / 4)}</span>
         <span>{formatTime(duration / 2)}</span>

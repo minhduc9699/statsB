@@ -52,7 +52,7 @@ const MatchStudio = () => {
           </button>
         </div>
         <div className="match-studio-container grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
-          <div className="col-span-9 h-full">
+          <div className="col-span-8 h-full">
             <div className="h-2/3">
               <VideoPlayerArea />
             </div>
@@ -61,7 +61,7 @@ const MatchStudio = () => {
               <TimelineTracker />
             </div>
           </div>
-          <div className="col-span-3 h-full">
+          <div className="col-span-4 h-full">
             <EventInputPanel />
           </div>
         </div>
