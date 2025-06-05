@@ -1,17 +1,17 @@
-import React, { useRef, useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { formatTime } from "../../utils/formatTime";
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { formatTime } from '../../utils/formatTime';
 
 const eventTypes = [
-  { type: "2PT", color: "bg-yellow-400", icon: "🏀" },
-  { type: "3PT", color: "bg-blue-400", icon: "🎯" },
-  { type: "REBOUND", color: "bg-green-400", icon: "🔁" },
-  { type: "TURNOVER", color: "bg-red-400", icon: "💥" },
+  { type: '2PT', color: 'bg-yellow-400', icon: '🏀' },
+  { type: '3PT', color: 'bg-blue-400', icon: '🎯' },
+  { type: 'REBOUND', color: 'bg-green-400', icon: '🔁' },
+  { type: 'TURNOVER', color: 'bg-red-400', icon: '💥' },
 ];
 
 const mockEvents = [
-  { id: 'e1', start: 10, end: 15, eventType: '2PT', eventDetail: 'Fast break' },
-  { id: 'e2', start: 25, end: 27, eventType: 'TURNOVER', eventDetail: 'Bad pass' },
+  { id: 'e1', start: 10, end: 14, eventType: '2PT', eventDetail: 'Fast break' },
+  { id: 'e2', start: 13, end: 14, eventType: 'TURNOVER', eventDetail: 'Bad pass' },
   { id: 'e3', start: 32, end: 38, eventType: 'REBOUND', eventDetail: 'Offensive' },
   { id: 'e4', start: 44, end: 47, eventType: '3PT', eventDetail: 'Corner shot' },
 ];
@@ -20,60 +20,53 @@ const TimelineTracker = ({ events = mockEvents, onSeek, onSelectEvent }) => {
   const currentTime = useSelector((state) => state.video.currentTime);
   const duration = useSelector((state) => state.video.duration);
 
-  const onAddEvent = () => {};
+  // Tính hàng cho mỗi event để tránh đè nhau
+  const layeredEvents = events.map((event, i) => {
+    let layer = 0;
+    for (let j = 0; j < i; j++) {
+      const prev = events[j];
+      if (
+        (event.start >= prev.start && event.start <= prev.end) ||
+        (event.end >= prev.start && event.end <= prev.end)
+      ) {
+        layer++;
+      }
+    }
+    return { ...event, layer };
+  });
 
   return (
     <div className="w-full p-2 h-full flex flex-col">
-      {/* Event Type Selector */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 mb-2 text-sm">
-          <span className="font-semibold text-gray-600">Event Type:</span>
-          {eventTypes.map((ev) => (
-            <div key={ev.type} className="flex items-center gap-1">
-              <span className={`w-3 h-3 rounded-full ${ev.color}`} />
-              <span className="text-gray-600">{ev.type}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center mb-2 text-sm">
-          <div className="flex justify-end items-center gap-4">
-            <span className="text-sky-500 font-bold">
-              {new Date(currentTime * 1000).toISOString().substr(14, 5)}
-            </span>
-            <button
-              onClick={() => onAddEvent(currentTime)}
-              className="bg-sky-500 hover:bg-sky-600 text-white text-sm px-4 py-1 rounded shadow"
-            >
-              ℹ️ Add Event
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Timeline Bar */}
       <div className="relative bg-gray-200 flex-1 rounded cursor-pointer overflow-hidden">
         {/* Current Time Indicator */}
         <div
-          className="absolute top-0 bottom-0 w-[2px] bg-sky-500"
+          className="absolute top-0 bottom-0 w-[2px] bg-sky-500 z-10"
           style={{ left: `${(currentTime / duration) * 100}%` }}
         />
 
-        {/* Event Markers as ranges */}
-        {events.map((event) => {
+        {/* Event Blocks */}
+        {layeredEvents.map((event) => {
           const type = eventTypes.find((et) => et.type === event.eventType);
           const startPercent = (event.start / duration) * 100;
           const endPercent = (event.end / duration) * 100;
-          const widthPercent = endPercent - startPercent;
+          const widthPercent = Math.max(endPercent - startPercent, 0.5);
 
           return (
             <div
               key={event.id}
-              title={`${event.eventType} - ${event.eventDetail}`}
-              className={`absolute top-[12px] h-[20px] ${type?.color || 'bg-dark'} rounded-md cursor-pointer`}
+              className={`absolute top-[${event.layer * 24 + 6}px] h-[20px] ${type?.color || 'bg-gray-400'} rounded-md cursor-pointer group`}
               style={{ left: `${startPercent}%`, width: `${widthPercent}%` }}
               onClick={() => onSelectEvent(event)}
             >
-              <span className="text-[10px] pl-1">{type?.icon}</span>
+              <span className="text-xs pl-1">{type?.icon}</span>
+              <div className="hidden group-hover:block absolute top-full mt-1 left-0 z-20 bg-white text-black text-xs px-2 py-1 rounded shadow">
+                <p className="font-semibold">{event.eventType}</p>
+                <p>{event.eventDetail}</p>
+                <p>
+                  {formatTime(event.start)} - {formatTime(event.end)}
+                </p>
+              </div>
             </div>
           );
         })}

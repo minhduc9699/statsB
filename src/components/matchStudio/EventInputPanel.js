@@ -61,7 +61,6 @@ const EventInputPanel = () => {
             </div>
           </div>
         </div>
-        <div className="text-[20px] pt-[22px] pb-[16px] text-start">Event log</div>
       </div>
     </div>
   );
