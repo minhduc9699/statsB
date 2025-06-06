@@ -30,7 +30,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashbroad-container bg-dark text-center">
+    <div className="dashboard-container bg-dark text-center">
       <div className="dashboard-content">
         <div className="grid grid-cols-12 gap-[6px] px-[24px] py-[18px] border-b border-tgray">
           <div className="col-span-3"></div>
