@@ -59,7 +59,7 @@ const MatchStudio = () => {
             <EventLog />
           </div>
         </div>
-        <MatchSetupDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
+        {/* <MatchSetupDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} /> */}
       </div>
 
     </>
