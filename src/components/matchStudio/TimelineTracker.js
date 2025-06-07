@@ -10,10 +10,28 @@ const eventTypes = [
 ];
 
 const mockEvents = [
-  { id: 'e1', start: 10, end: 15, eventType: '2PT', eventDetail: 'Fast break' },
-  { id: 'e2', start: 25, end: 27, eventType: 'TURNOVER', eventDetail: 'Bad pass' },
-  { id: 'e3', start: 32, end: 38, eventType: 'REBOUND', eventDetail: 'Offensive' },
-  { id: 'e4', start: 44, end: 47, eventType: '3PT', eventDetail: 'Corner shot' },
+  { id: "e1", start: 10, end: 15, eventType: "2PT", eventDetail: "Fast break" },
+  {
+    id: "e2",
+    start: 12,
+    end: 13,
+    eventType: "TURNOVER",
+    eventDetail: "Bad pass",
+  },
+  {
+    id: "e3",
+    start: 32,
+    end: 38,
+    eventType: "REBOUND",
+    eventDetail: "Offensive",
+  },
+  {
+    id: "e4",
+    start: 44,
+    end: 47,
+    eventType: "3PT",
+    eventDetail: "Corner shot",
+  },
 ];
 
 const TimelineTracker = ({ events = mockEvents, onSeek, onSelectEvent }) => {
@@ -69,7 +87,9 @@ const TimelineTracker = ({ events = mockEvents, onSeek, onSelectEvent }) => {
             <div
               key={event.id}
               title={`${event.eventType} - ${event.eventDetail}`}
-              className={`absolute top-[12px] h-[20px] ${type?.color || 'bg-dark'} rounded-md cursor-pointer`}
+              className={`absolute top-[12px] h-[20px] ${
+                type?.color || "bg-dark"
+              } rounded-md cursor-pointer`}
               style={{ left: `${startPercent}%`, width: `${widthPercent}%` }}
               onClick={() => onSelectEvent(event)}
             >
