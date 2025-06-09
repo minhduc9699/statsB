@@ -3,27 +3,18 @@ import { useEffect, useState, useRef } from "react";
 import matchAPI from "../api/matchAPI";
 import VideoPlayerArea from "../components/matchStudio/VideoPlayerArea";
 import TimelineTracker from "../components/matchStudio/TimelineTracker";
-import EventInputPanel from "../components/matchStudio/EventInputPanel";
+import EventCreator from "../components/matchStudio/EventCreator";
+import EventLog from "../components/matchStudio/EventLog";
+import MatchSetupDialog from "../components/matchStudio/MatchSetupDialog";
 
 import infoIcon from "../assets/info-icon.png";
 
 const MatchStudio = () => {
   const { matchId } = useParams(); // undefined nếu là tạo mới
   const [matchData, setMatchData] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(!matchId);
 
   const videoRef = useRef(null);
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [events, setEvents] = useState([
-    { id: "evt1", time: 25, type: "2PT" },
-    { id: "evt2", time: 90, type: "REBOUND" },
-  ]);
-
-  const handleSeek = (time) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
-    }
-  };
 
   useEffect(() => {
     if (matchId) {
@@ -52,7 +43,7 @@ const MatchStudio = () => {
           </button>
         </div>
         <div className="match-studio-container grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
-          <div className="col-span-8 h-full">
+          <div className="col-span-6 h-full">
             <div className="h-2/3">
               <VideoPlayerArea />
             </div>
@@ -62,9 +53,16 @@ const MatchStudio = () => {
             </div>
           </div>
           <div className="col-span-4 h-full">
-            <EventInputPanel />
+            <EventCreator />
+          </div>
+          <div className="col-span-2 h-full">
+            <EventLog />
           </div>
         </div>
+        {/* <MatchSetupDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+        /> */}
       </div>
     </>
   );
