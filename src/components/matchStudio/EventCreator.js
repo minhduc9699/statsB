@@ -50,13 +50,13 @@ const EventCreator = () => {
 
         {/* Event creation panel */}
         {!isPlaying && (
-          <div>
+          <>
             <div className="text-[20px] pb-[16px] text-start">
               Create Event at (
               <span className="text-sky-500">{formatTime(currentTime)}</span>)
             </div>
             <EventCreateSteps />
-          </div>
+          </>
         )}
       </div>
     </div>

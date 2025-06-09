@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useSelector } from "react-redux";
 import gsap from "gsap";
+import { useSelector } from "react-redux";
+import eventStepConfig from "../../config/eventStepConfig";
 
 const events = [
   { type: "shoot", label: "Shoot" },
@@ -13,32 +14,63 @@ const events = [
 ];
 
 const EventCreateSteps = () => {
-  const [step, setStep] = useState(0);
+  const [eventType, setEventType] = useState(null);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [formData, setFormData] = useState({});
   const containerRef = useRef(null);
 
-  useEffect(() => {
-    gsap.fromTo(
-      containerRef.current,
-      { opacity: 0, x: 50 },
-      { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }
-    );
-  }, [step]);
+  const steps = eventType ? eventStepConfig[eventType] || [] : [];
 
-  const handleEventClick = (eventType) => {
-    // Sau này lưu eventType vào state hoặc store
-    setStep(1); // Chuyển sang bước kế tiếp
+  useEffect(() => {
+    if (containerRef.current) {
+      gsap.fromTo(
+        containerRef.current,
+        { opacity: 0, x: 30 },
+        { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }
+      );
+    }
+  }, [stepIndex, eventType]);
+
+  const handleEventClick = (type) => {
+    setEventType(type);
+    setStepIndex(0);
+    setFormData({});
+  };
+
+  const handleNext = (value) => {
+    const key = steps[stepIndex]?.step;
+    setFormData((prev) => ({ ...prev, [key]: value }));
+    if (stepIndex < steps.length - 1) {
+      setStepIndex((prev) => prev + 1);
+    } else {
+      // Submit hoặc hoàn tất ở đây
+      console.log("Submitted data:", {
+        eventType,
+        ...formData,
+        [key]: value,
+      });
+      // Reset hoặc tiếp tục tùy ý
+    }
+  };
+
+  const handleBack = () => {
+    if (stepIndex === 0) {
+      setEventType(null);
+    } else {
+      setStepIndex((prev) => prev - 1);
+    }
   };
 
   return (
-    <div className="w-full h-full flex justify-center items-start">
-      <div className="w-full" ref={containerRef}>
-        {step === 0 && (
-          <div className="flex justify-center gap-2">
+    <div className="w-full h-full flex flex-col justify-center items-center">
+      <div className="w-full max-w-md" ref={containerRef}>
+        {!eventType && (
+          <div className="flex flex-wrap justify-center gap-2">
             {events.map((ev) => (
               <button
                 key={ev.type}
                 onClick={() => handleEventClick(ev.type)}
-                className="bg-orange hover:bg-[#ccc] text-white p-1 rounded"
+                className="bg-orange text-white px-4 py-2 rounded shadow"
               >
                 {ev.label}
               </button>
@@ -46,14 +78,35 @@ const EventCreateSteps = () => {
           </div>
         )}
 
-        {step === 1 && (
-          <div className="text-center">
-            <p className="text-lg font-semibold mb-4">
-              🔧 Step 2: More Details Coming Soon...
-            </p>
+        {eventType && stepIndex < steps.length && (
+          <div className="text-center space-y-4">
+            <h2 className="text-lg font-semibold mb-2">{steps[stepIndex].label}</h2>
+
+            {/* Nếu có options thì tạo các nút */}
+            {steps[stepIndex].options ? (
+              <div className="flex flex-wrap justify-center gap-2">
+                {steps[stepIndex].options.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => handleNext(opt)}
+                    className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-1 rounded"
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <button
+                onClick={() => handleNext("next")}
+                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-1 rounded"
+              >
+                Next
+              </button>
+            )}
+
             <button
-              className="text-sky-500 hover:underline"
-              onClick={() => setStep(0)}
+              onClick={handleBack}
+              className="text-sky-500 hover:underline text-sm mt-4 block"
             >
               ← Back
             </button>
