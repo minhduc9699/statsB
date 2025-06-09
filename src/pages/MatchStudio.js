@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import matchAPI from "../api/matchAPI";
 import VideoPlayerArea from "../components/matchStudio/VideoPlayerArea";
 import TimelineTracker from "../components/matchStudio/TimelineTracker";
-import EventInputPanel from "../components/matchStudio/EventInputPanel";
+import EventCreator from "../components/matchStudio/EventCreator";
 import EventLog from "../components/matchStudio/EventLog";
 import MatchSetupDialog from "../components/matchStudio/MatchSetupDialog";
 
@@ -43,7 +43,7 @@ const MatchStudio = () => {
           </button>
         </div>
         <div className="match-studio-container grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
-          <div className="col-span-7 h-full">
+          <div className="col-span-6 h-full">
             <div className="h-2/3">
               <VideoPlayerArea />
             </div>
@@ -52,16 +52,18 @@ const MatchStudio = () => {
               <TimelineTracker />
             </div>
           </div>
-          <div className="col-span-3 h-full">
-            <EventInputPanel />
+          <div className="col-span-4 h-full">
+            <EventCreator />
           </div>
           <div className="col-span-2 h-full">
             <EventLog />
           </div>
         </div>
-        {/* <MatchSetupDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} /> */}
+        {/* <MatchSetupDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+        /> */}
       </div>
-
     </>
   );
 };
