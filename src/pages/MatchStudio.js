@@ -1,6 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { setMatchInfo } from "../store/matchSlide";
 import matchAPI from "../api/matchAPI";
+import teamAPI from "../api/teamAPI";
+import playerAPI from "../api/playerAPI";
 import VideoPlayerArea from "../components/matchStudio/VideoPlayerArea";
 import TimelineTracker from "../components/matchStudio/TimelineTracker";
 import EventCreator from "../components/matchStudio/EventCreator";
@@ -10,25 +15,58 @@ import MatchSetupDialog from "../components/matchStudio/MatchSetupDialog";
 import infoIcon from "../assets/info-icon.png";
 
 const MatchStudio = () => {
+  const dispatch = useDispatch();
+  
   const { matchId } = useParams(); // undefined nếu là tạo mới
   const [matchData, setMatchData] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(!matchId);
+  const [matchType, setMatchType] = useState("5v5");
+  const [homeTeam, setHomeTeam] = useState(null);
+  const [awayTeam, setAwayTeam] = useState(null);
+  // const [teams, setTeams] = useState([]);
+  const [homePlayers, setHomePlayers] = useState([]);
+  const [awayPlayers, setAwayPlayers] = useState([]);
 
   const videoRef = useRef(null);
 
   useEffect(() => {
     if (matchId) {
-      const fetchMatch = async () => {
-        try {
-          const res = await matchAPI.getMatchById(matchId);
-          setMatchData(res.data);
-        } catch (err) {
-          console.error("Lỗi khi load match:", err);
-        }
-      };
-      fetchMatch();
+      const fetchAll = async () => {
+        await fetchMatch();
+        // await fectchEvents();
+      };  
+      fetchAll();
     }
   }, [matchId]);
+
+  const fetchMatch = async () => {
+    try {
+      const res = await matchAPI.getMatchById(matchId);
+      setMatchData(res.data);
+      // setMatchType(res.data.matchType);
+      await fectchTeams();
+    } catch (err) {
+      console.error("Lỗi khi load match:", err);
+    }
+  };
+
+  const fectchTeams = async () => {
+    if (matchData) {
+      const homeTeamId = matchData.homeTeam.id;
+      const awayTeamId = matchData.awayTeam.id;
+      try {
+        const homeTeamRes = await teamAPI.getTeamById(homeTeamId);
+        const awayTeamRes = await teamAPI.getTeamById(awayTeamId);
+        setHomeTeam(homeTeamRes.data);
+        setAwayTeam(awayTeamRes.data);
+        setHomePlayers(homeTeamRes.roster);
+        setAwayPlayers(awayTeamRes.roster);
+        dispatch(setMatchInfo({ matchType, homeTeam, awayTeam }));
+      } catch (err) {
+        console.error("Lỗi khi load teams:", err);
+      }
+    }
+  };
 
   return (
     <>
@@ -59,10 +97,10 @@ const MatchStudio = () => {
             <EventLog />
           </div>
         </div>
-        <MatchSetupDialog
+        {/* <MatchSetupDialog
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
-        />
+        /> */}
       </div>
     </>
   );

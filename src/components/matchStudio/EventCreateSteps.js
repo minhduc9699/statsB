@@ -13,7 +13,7 @@ const events = [
   { type: "fault", label: "Fault" },
 ];
 
-const EventCreateSteps = () => {
+const EventCreateSteps = ({ homeTeam, awayTeam, gameType }) => {
   const [eventType, setEventType] = useState(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [formData, setFormData] = useState({});

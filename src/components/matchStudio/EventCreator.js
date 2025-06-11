@@ -30,9 +30,15 @@ const TeamInfo = ({ name, logo, align = "left" }) => (
 );
 
 const EventCreator = () => {
+  // video store
   const currentTime = useSelector((state) => state.video.currentTime);
   const duration = useSelector((state) => state.video.duration);
   const isPlaying = useSelector((state) => state.video.isPlaying);
+  // match store
+  const matchType = useSelector((state) => state.match.matchType);
+  const homeTeam = useSelector((state) => state.match.homeTeam);
+  const awayTeam = useSelector((state) => state.match.awayTeam);
+
 
   return (
     <div className="h-full w-full flex items-center justify-center bg-slate-100">
@@ -55,7 +61,7 @@ const EventCreator = () => {
               Create Event at (
               <span className="text-sky-500">{formatTime(currentTime)}</span>)
             </div>
-            <EventCreateSteps />
+            <EventCreateSteps homeTeam={homeTeam} awayTeam={awayTeam} matchType={matchType} />
           </>
         )}
       </div>
