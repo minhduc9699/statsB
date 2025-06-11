@@ -12,6 +12,7 @@ const matchSlice = createSlice({
   initialState,
   reducers: {
     setMatchInfo: (state, action) => {
+      console.log(action.payload);
       const { matchType, homeTeam, awayTeam } = action.payload;
       state.matchType = matchType;
       state.homeTeam = homeTeam;
