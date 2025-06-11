@@ -62,7 +62,7 @@ const EventCreateSteps = ({ homeTeam, awayTeam, gameType }) => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center">
+    <div className="w-full h-full flex flex-col justify-start items-center">
       <div className="w-full max-w-md" ref={containerRef}>
         {!eventType && (
           <div className="flex flex-wrap justify-center gap-2">

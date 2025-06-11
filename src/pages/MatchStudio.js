@@ -16,7 +16,7 @@ import infoIcon from "../assets/info-icon.png";
 
 const MatchStudio = () => {
   const dispatch = useDispatch();
-  
+
   const { matchId } = useParams(); // undefined nếu là tạo mới
   const [matchData, setMatchData] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(!matchId);
@@ -34,7 +34,7 @@ const MatchStudio = () => {
       const fetchAll = async () => {
         await fetchMatch();
         // await fectchEvents();
-      };  
+      };
       fetchAll();
     }
   }, [matchId]);
@@ -42,26 +42,39 @@ const MatchStudio = () => {
   const fetchMatch = async () => {
     try {
       const res = await matchAPI.getMatchById(matchId);
+      console.log(res.data);
       setMatchData(res.data);
-      // setMatchType(res.data.matchType);
-      await fectchTeams();
+      setMatchType(res.data.matchType);
+      await fetchTeams();
     } catch (err) {
       console.error("Lỗi khi load match:", err);
     }
   };
 
-  const fectchTeams = async () => {
+  useEffect(() => {
+    let fetch = async () => await fetchTeams();
+    fetch();
+  }, [matchData]);
+
+  const fetchTeams = async () => {
+    console.log(matchData)
     if (matchData) {
-      const homeTeamId = matchData.homeTeam.id;
-      const awayTeamId = matchData.awayTeam.id;
+      const homeTeamId = matchData.homeTeam._id;
+      const awayTeamId = matchData.awayTeam._id;
       try {
         const homeTeamRes = await teamAPI.getTeamById(homeTeamId);
         const awayTeamRes = await teamAPI.getTeamById(awayTeamId);
-        setHomeTeam(homeTeamRes.data);
-        setAwayTeam(awayTeamRes.data);
-        setHomePlayers(homeTeamRes.roster);
-        setAwayPlayers(awayTeamRes.roster);
-        dispatch(setMatchInfo({ matchType, homeTeam, awayTeam }));
+        if (homeTeamRes && awayTeamRes) {
+          setHomeTeam(homeTeamRes.data);
+          setAwayTeam(awayTeamRes.data);
+          setHomePlayers(homeTeamRes.roster);
+          setAwayPlayers(awayTeamRes.roster);
+          dispatch(setMatchInfo({ 
+            matchType: matchData.matchType,
+            homeTeam: homeTeamRes.data,
+            awayTeam: awayTeamRes.data
+          }));
+        }
       } catch (err) {
         console.error("Lỗi khi load teams:", err);
       }
@@ -97,10 +110,10 @@ const MatchStudio = () => {
             <EventLog />
           </div>
         </div>
-        {/* <MatchSetupDialog
+        {!matchId && <MatchSetupDialog
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
-        /> */}
+        />}
       </div>
     </>
   );

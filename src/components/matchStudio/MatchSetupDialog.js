@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
-import teamAPI from "../../api/teamAPI";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import teamAPI from "../../api/teamAPI";
+import matchAPI from "../../api/matchAPI";
 // import { setMatchInfo } from "../../store/matchSlide";
 
 const MatchSetupDialog = ({ onClose }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [season, setSeason] = useState("");
-  const [matchType, setMatchType] = useState("5v5");
+  const [gameType, setGameType] = useState("5v5");
   const [homeTeamId, setHomeTeamId] = useState(null);
   const [awayTeamId, setAwayTeamId] = useState(null);
 
@@ -27,15 +29,38 @@ const MatchSetupDialog = ({ onClose }) => {
     fetchTeams();
   }, []);
 
-  const handleSubmit = () => {
-    if (!season || !homeTeamId || !awayTeamId || homeTeamId === awayTeamId) {
-      alert("Please select valid teams and season.");
+  const handleSubmit = async () => {
+    if (!homeTeamId || !awayTeamId || homeTeamId === awayTeamId) {
+      alert("Please select valid teams.");
       return;
     }
-    console.log(season, matchType, homeTeamId, awayTeamId);
-    // dispatch(setMatchInfo({ season, matchType, homeTeamId, awayTeamId }));
+    await createMatch();
+    console.log( gameType, homeTeamId, awayTeamId);
+    // dispatch(setMatchInfo({ season, gameType, homeTeamId, awayTeamId }));
     onClose();
   };
+
+  const createMatch = async () => {
+    let data = {
+      gameType,
+      homeTeam: homeTeamId,
+      awayTeam:awayTeamId,
+      date: "",
+      status: "Upcoming",
+      videoUrl: null,
+    }
+    try {
+      const response = await matchAPI.createMatch(data); 
+      const matchId  = response.data.id
+      if (matchId) {
+      navigate(`/match-studio/${matchId}`, { replace: true }); // chuyển route mới
+      onClose();
+    }
+    } catch (error) {
+      console.error("Error creating match:", error);
+      throw error;
+    }
+  }
 
   const renderDropdown = (type) => {
     const isHome = type === "home";
@@ -113,22 +138,12 @@ const MatchSetupDialog = ({ onClose }) => {
       <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg">
         <h2 className="text-xl font-bold mb-4 text-center">Create New Match</h2>
 
-        {/* Season */}
-        <label className="block text-sm font-medium">Season</label>
-        <input
-          type="text"
-          className="w-full border p-2 rounded mb-4"
-          value={season}
-          onChange={(e) => setSeason(e.target.value)}
-          placeholder="e.g. 2024-2025"
-        />
-
         {/* Match Type */}
         <label className="block text-sm font-medium">Match Type</label>
         <select
           className="w-full border p-2 rounded mb-4"
-          value={matchType}
-          onChange={(e) => setMatchType(e.target.value)}
+          value={gameType}
+          onChange={(e) => setGameType(e.target.value)}
         >
           <option value="5v5">5v5</option>
           <option value="3v3">3v3</option>

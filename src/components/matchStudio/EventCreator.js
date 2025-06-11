@@ -18,10 +18,10 @@ const events = [
   { type: "fault", icon: "🚫" },
 ];
 
-const TeamInfo = ({ name, logo, align = "left" }) => (
+const TeamInfo = ({ name = "Team Name", logo ="", align = "left" }) => (
   <div
     className={`flex items-center gap-2 w-1/3 ${
-      align === "right" ? "justify-end flex-row-reverse text-end" : ""
+      align === "right" ? "justify-start flex-row-reverse text-end" : ""
     }`}
   >
     <img src={logo} alt={name} className="h-[36px] w-[36px]" />
@@ -45,13 +45,13 @@ const EventCreator = () => {
       <div className="w-full h-[95%] p-4 bg-white rounded shadow">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <TeamInfo name="Boston Celtics" logo={BOSTON} />
+          <TeamInfo name={homeTeam?.name} logo={homeTeam?.avatar} />
           <div className="text-[28px] font-semibold text-center w-1/3 flex justify-center gap-2">
             <span>36</span>
             <span>-</span>
             <span>16</span>
           </div>
-          <TeamInfo name="Golden State Warriors" logo={GOLDEN} align="right" />
+          <TeamInfo name={awayTeam?.name} logo={awayTeam?.avatar} align="right" />
         </div>
 
         {/* Event creation panel */}
