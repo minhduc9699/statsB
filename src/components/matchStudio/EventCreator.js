@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { formatTime } from "../../utils/formatTime";
 import EventCreateSteps from "./EventCreateSteps";
+import EventCreateStepsV2 from "./EventCreateSteps-v2"
 
 const BOSTON =
   "https://upload.wikimedia.org/wikipedia/en/8/8f/Boston_Celtics.svg";
@@ -32,10 +33,8 @@ const TeamInfo = ({ name = "Team Name", logo ="", align = "left" }) => (
 const EventCreator = () => {
   // video store
   const currentTime = useSelector((state) => state.video.currentTime);
-  const duration = useSelector((state) => state.video.duration);
   const isPlaying = useSelector((state) => state.video.isPlaying);
   // match store
-  const matchType = useSelector((state) => state.match.matchType);
   const homeTeam = useSelector((state) => state.match.homeTeam);
   const awayTeam = useSelector((state) => state.match.awayTeam);
 
@@ -61,7 +60,7 @@ const EventCreator = () => {
               Create Event at (
               <span className="text-sky-500">{formatTime(currentTime)}</span>)
             </div>
-            <EventCreateSteps homeTeam={homeTeam} awayTeam={awayTeam} matchType={matchType} />
+            <EventCreateStepsV2 />
           </>
         )}
       </div>

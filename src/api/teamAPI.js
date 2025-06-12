@@ -35,7 +35,7 @@ const teamAPI = {
 
   getTeamById: async (id) => {
     try {
-      const response = await axios.get(`${BASE_URL}/teams/${id}`);
+      const response = await axios.get(`${BASE_URL}/teams/${id}/getTeam`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching team with ID ${id}:`, error);

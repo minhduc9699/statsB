@@ -35,8 +35,6 @@ const MatchSetupDialog = ({ onClose }) => {
       return;
     }
     await createMatch();
-    console.log( gameType, homeTeamId, awayTeamId);
-    // dispatch(setMatchInfo({ season, gameType, homeTeamId, awayTeamId }));
     onClose();
   };
 

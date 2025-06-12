@@ -1,11 +1,10 @@
+import React, { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setMatchInfo } from "../store/matchSlide";
-import matchAPI from "../api/matchAPI";
+import { setMatchId, setMatchInfo, setGameType } from "../store/matchSlide";
 import teamAPI from "../api/teamAPI";
-import playerAPI from "../api/playerAPI";
+import matchAPI from "../api/matchAPI";
 import VideoPlayerArea from "../components/matchStudio/VideoPlayerArea";
 import TimelineTracker from "../components/matchStudio/TimelineTracker";
 import EventCreator from "../components/matchStudio/EventCreator";
@@ -20,7 +19,6 @@ const MatchStudio = () => {
   const { matchId } = useParams(); // undefined nếu là tạo mới
   const [matchData, setMatchData] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(!matchId);
-  const [matchType, setMatchType] = useState("5v5");
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
   // const [teams, setTeams] = useState([]);
@@ -30,56 +28,71 @@ const MatchStudio = () => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (matchId) {
-      const fetchAll = async () => {
-        await fetchMatch();
-        // await fectchEvents();
-      };
-      fetchAll();
-    }
-  }, [matchId]);
+  if (!matchId) return;
 
-  const fetchMatch = async () => {
+  const initMatchData = async () => {
     try {
-      const res = await matchAPI.getMatchById(matchId);
-      console.log(res.data);
-      setMatchData(res.data);
-      setMatchType(res.data.matchType);
-      await fetchTeams();
+      const matchData = await fetchMatchData(matchId);
+      const { homeTeam, awayTeam } = await fetchTeamsData(matchData);
+
+      // Cập nhật Redux store
+      dispatch(setMatchId(matchId));
+      dispatch(setGameType(matchData.gameType));
+      dispatch(setMatchInfo({ homeTeam, awayTeam }));
+
+      // Cập nhật local state nếu cần
+      setMatchData(matchData);
+      setHomeTeam(homeTeam);
+      setAwayTeam(awayTeam);
+      setHomePlayers(homeTeam.rosters || []);
+      setAwayPlayers(awayTeam.rosters || []);
+
     } catch (err) {
-      console.error("Lỗi khi load match:", err);
+      console.error("Lỗi khởi tạo dữ liệu trận đấu:", err);
     }
   };
 
-  useEffect(() => {
-    let fetch = async () => await fetchTeams();
-    fetch();
-  }, [matchData]);
+  initMatchData();
+}, [matchId]);
 
-  const fetchTeams = async () => {
-    console.log(matchData)
-    if (matchData) {
-      const homeTeamId = matchData.homeTeam._id;
-      const awayTeamId = matchData.awayTeam._id;
-      try {
-        const homeTeamRes = await teamAPI.getTeamById(homeTeamId);
-        const awayTeamRes = await teamAPI.getTeamById(awayTeamId);
-        if (homeTeamRes && awayTeamRes) {
-          setHomeTeam(homeTeamRes.data);
-          setAwayTeam(awayTeamRes.data);
-          setHomePlayers(homeTeamRes.roster);
-          setAwayPlayers(awayTeamRes.roster);
-          dispatch(setMatchInfo({ 
-            matchType: matchData.matchType,
-            homeTeam: homeTeamRes.data,
-            awayTeam: awayTeamRes.data
-          }));
-        }
-      } catch (err) {
-        console.error("Lỗi khi load teams:", err);
-      }
+  const fetchMatchData = async (id) => {
+  try {
+    const res = await matchAPI.getMatchById(id);
+    if (!res?.data) throw new Error("Không có dữ liệu match.");
+    return res.data;
+  } catch (error) {
+    console.error("Lỗi khi fetch match:", error);
+    throw error;
+  }
+};
+
+const fetchTeamsData = async (matchData) => {
+  const homeId = matchData?.homeTeam?._id;
+  const awayId = matchData?.awayTeam?._id;
+
+  if (!homeId || !awayId) {
+    throw new Error("Thiếu thông tin team trong matchData");
+  }
+
+  try {
+    const [homeRes, awayRes] = await Promise.all([
+      teamAPI.getTeamById(homeId),
+      teamAPI.getTeamById(awayId),
+    ]);
+
+    const homeData = homeRes?.data;
+    const awayData = awayRes?.data;
+
+    if (!homeData || !awayData) {
+      throw new Error("Không lấy được dữ liệu team");
     }
-  };
+
+    return { homeTeam: homeData, awayTeam: awayData };
+  } catch (error) {
+    console.error("Lỗi khi fetch team:", error);
+    throw error;
+  }
+};
 
   return (
     <>

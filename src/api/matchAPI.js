@@ -35,7 +35,7 @@ const matchAPI = {
 
   getMatchById: async (id) => {
     try {
-      const response = await axios.get(`${BASE_URL}/matches/${id}`);
+      const response = await axios.get(`${BASE_URL}/matches/${id}/getMatch`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching match with ID ${id}:`, error);
