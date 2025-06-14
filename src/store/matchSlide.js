@@ -16,7 +16,6 @@ const matchSlice = createSlice({
       state.gameType = gameType;
       state.homeTeam = homeTeam;
       state.awayTeam = awayTeam;
-      console.log(state);
     },
     setGameType: (state, action) => {
       state.gameType = action.payload;
@@ -27,11 +26,7 @@ const matchSlice = createSlice({
   },
 });
 
-export const {
-  setMatchInfo,
-  setMatchId,
-  setGameType,
-  clearMatchInfo
-} = matchSlice.actions;
+export const { setMatchInfo, setMatchId, setGameType, clearMatchInfo } =
+  matchSlice.actions;
 
 export default matchSlice.reducer;
