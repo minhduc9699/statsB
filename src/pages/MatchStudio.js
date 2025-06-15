@@ -9,6 +9,7 @@ import VideoPlayerArea from "../components/matchStudio/VideoPlayerArea";
 import TimelineTracker from "../components/matchStudio/TimelineTracker";
 import EventCreator from "../components/matchStudio/EventCreator";
 import EventLog from "../components/matchStudio/EventLog";
+import MatchInfo from "../components/matchStudio/MatchInfo";
 import MatchSetupDialog from "../components/matchStudio/MatchSetupDialog";
 
 import infoIcon from "../assets/info-icon.png";
@@ -28,76 +29,75 @@ const MatchStudio = () => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-  if (!matchId) return;
+    if (!matchId) return;
 
-  const initMatchData = async () => {
+    const initMatchData = async () => {
+      try {
+        const matchData = await fetchMatchData(matchId);
+        const { homeTeam, awayTeam } = await fetchTeamsData(matchData);
+
+        // Cập nhật Redux store
+        dispatch(setMatchId(matchId));
+        dispatch(setGameType(matchData.gameType));
+        dispatch(setMatchInfo({ homeTeam, awayTeam }));
+
+        // Cập nhật local state nếu cần
+        setMatchData(matchData);
+        setHomeTeam(homeTeam);
+        setAwayTeam(awayTeam);
+        setHomePlayers(homeTeam.rosters || []);
+        setAwayPlayers(awayTeam.rosters || []);
+      } catch (err) {
+        console.error("Lỗi khởi tạo dữ liệu trận đấu:", err);
+      }
+    };
+
+    initMatchData();
+  }, [matchId]);
+
+  const fetchMatchData = async (id) => {
     try {
-      const matchData = await fetchMatchData(matchId);
-      const { homeTeam, awayTeam } = await fetchTeamsData(matchData);
-
-      // Cập nhật Redux store
-      dispatch(setMatchId(matchId));
-      dispatch(setGameType(matchData.gameType));
-      dispatch(setMatchInfo({ homeTeam, awayTeam }));
-
-      // Cập nhật local state nếu cần
-      setMatchData(matchData);
-      setHomeTeam(homeTeam);
-      setAwayTeam(awayTeam);
-      setHomePlayers(homeTeam.rosters || []);
-      setAwayPlayers(awayTeam.rosters || []);
-
-    } catch (err) {
-      console.error("Lỗi khởi tạo dữ liệu trận đấu:", err);
+      const res = await matchAPI.getMatchById(id);
+      if (!res?.data) throw new Error("Không có dữ liệu match.");
+      return res.data;
+    } catch (error) {
+      console.error("Lỗi khi fetch match:", error);
+      throw error;
     }
   };
 
-  initMatchData();
-}, [matchId]);
+  const fetchTeamsData = async (matchData) => {
+    const homeId = matchData?.homeTeam?._id;
+    const awayId = matchData?.awayTeam?._id;
 
-  const fetchMatchData = async (id) => {
-  try {
-    const res = await matchAPI.getMatchById(id);
-    if (!res?.data) throw new Error("Không có dữ liệu match.");
-    return res.data;
-  } catch (error) {
-    console.error("Lỗi khi fetch match:", error);
-    throw error;
-  }
-};
-
-const fetchTeamsData = async (matchData) => {
-  const homeId = matchData?.homeTeam?._id;
-  const awayId = matchData?.awayTeam?._id;
-
-  if (!homeId || !awayId) {
-    throw new Error("Thiếu thông tin team trong matchData");
-  }
-
-  try {
-    const [homeRes, awayRes] = await Promise.all([
-      teamAPI.getTeamById(homeId),
-      teamAPI.getTeamById(awayId),
-    ]);
-
-    const homeData = homeRes?.data;
-    const awayData = awayRes?.data;
-
-    if (!homeData || !awayData) {
-      throw new Error("Không lấy được dữ liệu team");
+    if (!homeId || !awayId) {
+      throw new Error("Thiếu thông tin team trong matchData");
     }
 
-    return { homeTeam: homeData, awayTeam: awayData };
-  } catch (error) {
-    console.error("Lỗi khi fetch team:", error);
-    throw error;
-  }
-};
+    try {
+      const [homeRes, awayRes] = await Promise.all([
+        teamAPI.getTeamById(homeId),
+        teamAPI.getTeamById(awayId),
+      ]);
+
+      const homeData = homeRes?.data;
+      const awayData = awayRes?.data;
+
+      if (!homeData || !awayData) {
+        throw new Error("Không lấy được dữ liệu team");
+      }
+
+      return { homeTeam: homeData, awayTeam: awayData };
+    } catch (error) {
+      console.error("Lỗi khi fetch team:", error);
+      throw error;
+    }
+  };
 
   return (
     <>
-      <div className="bg-studiobg">
-        <div className="bg-dark text-white font-roboto text-[14px] flex items-center justify-between px-[24px] py-[10px] h-[70px]">
+      <div className="bg-studiobg w-full h-full overflow-hidden">
+        {/* <div className="bg-dark text-white font-roboto text-[14px] flex items-center justify-between px-[24px] py-[10px] h-[70px]">
           <div className="">
             Matches List/ {matchId ? "Edit Match" : "Create New Match"}
           </div>
@@ -105,28 +105,35 @@ const fetchTeamsData = async (matchData) => {
             <img className="w-[10px] h-[10px]" src={infoIcon} alt="info-icon" />
             <span>View Dashboard</span>
           </button>
-        </div>
-        <div className="match-studio-container grid grid-cols-12 gap-[12px] px-[14px] overflow-hidden">
+        </div> */}
+        <div className="match-studio-container grid grid-cols-12 gap-[12px] p-[14px] h-screen">
           <div className="col-span-6 h-full">
             <div className="h-2/3">
               <VideoPlayerArea />
             </div>
 
             <div className="h-1/3">
-              <TimelineTracker />
+              <TimelineTracker matchId={matchId} />
             </div>
           </div>
-          <div className="col-span-4 h-full">
-            <EventCreator />
-          </div>
-          <div className="col-span-2 h-full">
-            <EventLog />
+          <div className="col-span-6 h-full flex flex-col gap-[12px]">
+            <div className="h-1/2">
+              <div className="h-full flex items-center justify-between gap-[12px]">
+                <MatchInfo/>
+                <EventLog />
+              </div>
+            </div>
+            <div className="h-full">
+              <EventCreator />
+            </div>
           </div>
         </div>
-        {!matchId && <MatchSetupDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-        />}
+        {!matchId && (
+          <MatchSetupDialog
+            isOpen={isDialogOpen}
+            onClose={() => setIsDialogOpen(false)}
+          />
+        )}
       </div>
     </>
   );

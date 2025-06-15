@@ -5,6 +5,7 @@ const initialState = {
   gameType: "5v5",
   homeTeam: null,
   awayTeam: null,
+  matchEvents: [],
 };
 
 const matchSlice = createSlice({
@@ -23,10 +24,18 @@ const matchSlice = createSlice({
     setMatchId: (state, action) => {
       state.matchId = action.payload;
     },
+    setMatchEvents: (state, action) => {
+      state.matchEvents = [...state.matchEvents, action.payload];
+    },
   },
 });
 
-export const { setMatchInfo, setMatchId, setGameType, clearMatchInfo } =
-  matchSlice.actions;
+export const {
+  setMatchInfo,
+  setMatchId,
+  setGameType,
+  clearMatchInfo,
+  setMatchEvents,
+} = matchSlice.actions;
 
 export default matchSlice.reducer;

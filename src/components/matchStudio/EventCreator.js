@@ -40,10 +40,9 @@ const EventCreator = () => {
 
 
   return (
-    <div className="h-full w-full flex items-center justify-center bg-slate-100">
-      <div className="w-full h-[95%] p-4 bg-white rounded shadow">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-4">
+    <div className="h-full w-full flex items-center justify-center bg-white rounded shadow">
+      <div className="w-full h-[100%] p-4 bg-white rounded shadow">
+        {/* <div className="flex justify-between items-center mb-4">
           <TeamInfo name={homeTeam?.name} logo={homeTeam?.avatar} />
           <div className="text-[28px] font-semibold text-center w-1/3 flex justify-center gap-2">
             <span>36</span>
@@ -51,7 +50,7 @@ const EventCreator = () => {
             <span>16</span>
           </div>
           <TeamInfo name={awayTeam?.name} logo={awayTeam?.avatar} align="right" />
-        </div>
+        </div> */}
 
         {/* Event creation panel */}
         {!isPlaying && (
