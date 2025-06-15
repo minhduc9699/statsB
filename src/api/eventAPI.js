@@ -4,7 +4,6 @@ const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 const eventAPI = {
   createEvent: async (matchId,eventData) => {
-    console.log(matchId);
     try {
       const response = await axios.post(`${BASE_URL}/matches/${matchId}/events`, eventData);
       return response.data;

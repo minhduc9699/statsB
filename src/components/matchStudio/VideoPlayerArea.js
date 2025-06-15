@@ -43,7 +43,6 @@ const VideoPlayerArea = () => {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    console.log("object");
     handleSeek();
   }, [seekingTime]);
 
@@ -107,9 +106,6 @@ const VideoPlayerArea = () => {
   const handleUpdateTime = () => {
     const video = videoRef.current;
     if (!video) return;
-    // if (isSeeking) {
-    //   handleSeek();
-    // }
     dispatch(setCurrentTime(video.currentTime));
   };
 
@@ -119,19 +115,14 @@ const VideoPlayerArea = () => {
   };
 
   const handleSeek = (input) => {
-    console.log(input);
     const video = videoRef.current;
     let seekTime = null;
 
-    // Trường hợp người dùng kéo input range
     if (input && input.target) {
       seekTime = parseFloat(input.target.value);
     }
     // Trường hợp được truyền trực tiếp số (từ store.seekingTime, timeline tracker)
-    else if (
-      typeof input === "number" ||
-      (typeof input === "string" && !isNaN(Number(input)))
-    ) {
+    else if (!input) {
       seekTime = parseFloat(seekingTime);
     }
     // Không hợp lệ thì bỏ qua

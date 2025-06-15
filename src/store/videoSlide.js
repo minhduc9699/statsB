@@ -54,7 +54,6 @@ const videoSlide = createSlice({
       state.isPlaying = action.payload;
     },
     setSeekingTime: (state, action) => {
-      console.log(action.payload);
       state.seekingTime = action.payload;
     },
   },
