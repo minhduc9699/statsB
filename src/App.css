@@ -33,7 +33,7 @@
 }
 
 .match-studio-container {
-  height: calc(100vh - 150px);
+  height: calc(100vh - 80px);
 }
 
 @keyframes App-logo-spin {

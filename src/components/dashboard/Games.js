@@ -41,7 +41,9 @@ const Games = () => {
   const fetchMatches = async () => {
     try {
       const res = await matchAPI.getAllMatches();
-      setMatchesList(res.data);
+      if (res.data && !res.data.isArray()) {
+        setMatchesList(res.data);
+      }
       return res.data;
     } catch (err) {
       console.error(err);

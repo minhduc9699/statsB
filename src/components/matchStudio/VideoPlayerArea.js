@@ -9,6 +9,7 @@ import {
   setCurrentTime,
   setIsPlaying,
   setDuration,
+  setSeekingTime,
 } from "../../store/videoSlide";
 
 import fiveBackward from "../../assets/video-player/5-seconds-backward.png";
@@ -26,6 +27,7 @@ const VideoPlayerArea = () => {
   const currentTime = useSelector((state) => state.video.currentTime);
   const duration = useSelector((state) => state.video.duration);
   const isPlaying = useSelector((state) => state.video.isPlaying);
+  const seekingTime = useSelector((state) => state.video.seekingTime);
 
   const containerRef = useRef(null);
   const [playbackRate, setPlaybackRate] = useState(1);
@@ -41,8 +43,8 @@ const VideoPlayerArea = () => {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    // console.log(currentVideoIndex);
-  });
+    handleSeek();
+  }, [seekingTime]);
 
   const handleUpload = (e) => {
     const file = e.target.files[0];
@@ -112,11 +114,30 @@ const VideoPlayerArea = () => {
     dispatch(setDuration(videoRef.current.duration));
   };
 
-  const handleSeek = (e) => {
+  const handleSeek = (input) => {
     const video = videoRef.current;
-    const seekTime = parseFloat(e.target.value);
-    if (video) video.currentTime = seekTime;
-    dispatch(setCurrentTime(video.currentTime));
+    let seekTime = null;
+
+    if (input && input.target) {
+      seekTime = parseFloat(input.target.value);
+    }
+    // Trường hợp được truyền trực tiếp số (từ store.seekingTime, timeline tracker)
+    else if (!input) {
+      seekTime = parseFloat(seekingTime);
+    }
+    // Không hợp lệ thì bỏ qua
+    else {
+      return;
+    }
+
+    if (video && !isNaN(seekTime)) {
+      video.currentTime = seekTime;
+      dispatch(setCurrentTime(seekTime));
+      video.pause();
+      dispatch(setIsPlaying(false));
+    }
+    // Nếu có dùng seekingTime trong store, reset về null
+    dispatch(setSeekingTime(null));
   };
 
   const handleMouseDown = (e) => {
